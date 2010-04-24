@@ -1,4 +1,6 @@
-﻿using PluginCore;
+﻿using AutoVersion.Design;
+
+using PluginCore;
 
 using System;
 using System.Collections.Generic;
@@ -28,77 +30,63 @@ namespace AutoVersion
 
         private string _versionFilename = string.Empty;
         /// <summary>
-        /// Gets or sets the assembly info filename.
+        /// Gets or sets the version info filename.
         /// </summary>
-        /// <value>The assembly info filename.</value>
+        /// <value>The version info filename.</value>
         [Category("Increment Settings")]
         [Description("Use this value if the version attributes aren't saved in the default file. ")]
         [DefaultValue("")]
         [DisplayName("Version Filename")]
-        [EditorAttribute(typeof(FileNameEditor), typeof(UITypeEditor))]
+        [EditorAttribute(typeof(FileNameEditorEx), typeof(UITypeEditor))]
         public string VersionFilename
         {
             get { return _versionFilename; }
             set
             {
-                if (!string.IsNullOrEmpty(value))
-                {
-                    // Make the path relative
-
-                    //                    string basePath = Path.GetDirectoryName(SolutionItem.Filename);
-                    //                    _assemblyInfoFilename = Common.MakeRelativePath(basePath, value);
-                }
-                else
-                    _versionFilename = string.Empty;
+                _versionFilename = !string.IsNullOrEmpty(value) ? Utils.IOUtils.MakeRelativePath(PluginBase.CurrentProject.ProjectPath, value) : string.Empty;
             }
         }
 
-        private bool _autoUpdateVersionData;
+        private string _versionFilePackage = string.Empty;
+        /// <summary>
+        /// Gets or sets the version file package level.
+        /// </summary>
+        /// <value>The package name.</value>
+        [Category("Increment Settings")]
+        [Description("Use this value if the version is not located at the root of a class path. ")]
+        [DefaultValue("")]
+        [DisplayName("Version File Package")]
+        public string VersionFilePackage
+        {
+            get { return _versionFilePackage; }
+            set
+            {
+                _versionFilePackage = value ?? string.Empty;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether to auto update the file version.
         /// </summary>
         /// <value>
         /// 	<c>true</c> to auto update the file version; otherwise, <c>false</c>.
         /// </value>
-        [Category("Increment Settings")]
-        [Description("Auto update the version data.")]
-        [DisplayName("Update version data")]
-        [DefaultValue(false)]
-        public bool AutoUpdateVersionData
-        {
-            get { return _autoUpdateVersionData; }
-            set { _autoUpdateVersionData = value; }
-        }
+        [Category("Increment Settings"), Description("Auto update the version data."), DisplayName("Update version data"), DefaultValue(false)]
+        public bool AutoUpdateVersionData { get; set; }
 
-        private DateTime _projectStartDate;
         /// <summary>
         /// Gets or sets the start date.
         /// </summary>
         /// <value>The start date.</value>
-        [Category("Increment Settings")]
-        [Description("The start date to use.")]
-        [DisplayName("Start Date")]
-        [DefaultValue(typeof(DateTime), "1975/10/21")]
-        public DateTime StartDate
-        {
-            get { return _projectStartDate; }
-            set { _projectStartDate = value; }
-        }
+        [Category("Increment Settings"), Description("The start date to use."), DisplayName("Start Date"), DefaultValue(typeof(DateTime), "1975/10/21")]
+        public DateTime StartDate { get; set; }
 
-        private bool _isUniversalTime;
         /// <summary>
         /// Gets or sets a value indicating whether this instance is using UTC.
         /// </summary>
         /// <value><c>true</c> if this instance is using UTC; otherwise, <c>false</c>.</value>
-        [Category("Increment Settings")]
-        [Description("Indicates wheter to use Coordinated Universal Time (UTC) time stamps.")]
-        [DisplayName("Use Coordinated Universal Time")]
-        [DefaultValue(false)]
-        public bool IsUniversalTime
-        {
-            get { return this._isUniversalTime; }
-            set { this._isUniversalTime = value; }
-        }
+        [Category("Increment Settings"), Description("Indicates wheter to use Coordinated Universal Time (UTC) time stamps."), DisplayName("Use Coordinated Universal Time"), DefaultValue(false)]
+        public bool IsUniversalTime { get; set; }
 
         private VersioningStyle _versioningStyle = new VersioningStyle();
         /// <summary>
@@ -120,24 +108,16 @@ namespace AutoVersion
             return _versioningStyle.ToString() != "None.None.None.None";
         }
 
-        private BuildActionType _buildAction;
         /// <summary>
         /// Gets or sets the build action
         /// </summary>
         /// <value>The build action on which the auto update should occur.</value>
-        [Category("Condition")]
-        [DefaultValue(BuildActionType.Both)]
-        [DisplayName("Build Action")]
-        [Description("Set this to the desired build action when the auto update should occur.")]
-        public BuildActionType BuildAction
-        {
-            get { return _buildAction; }
-            set { _buildAction = value; }
-        }
+        [Category("Condition"), DefaultValue(BuildActionType.Both), DisplayName("Build Action"), Description("Set this to the desired build action when the auto update should occur.")]
+        public BuildActionType BuildAction { get; set; }
 
         #endregion
 
-        #region  Constructor 
+        #region  Constructor
 
         public VersioningSettings()
         {
@@ -169,7 +149,8 @@ namespace AutoVersion
                     XElement autoVersionElement = projectVersionDocument.Element("autoVersion");
 
                     AutoUpdateVersionData = bool.Parse(GetProjectVariable(autoVersionElement, "autoUpdateVersionData", "false"));
-                    VersionFilename = GetProjectVariable(autoVersionElement, "versionFileName", string.Empty);
+                    VersionFilename = GetProjectVariable(autoVersionElement, "versionFilename", string.Empty);
+                    VersionFilePackage = GetProjectVariable(autoVersionElement, "versionFilePackage", string.Empty);
 
                     try
                     {
@@ -183,7 +164,7 @@ namespace AutoVersion
                     string versioningStyle = GetProjectVariable(autoVersionElement, "versioningStyle", VersioningStyle.GetDefaultGlobalVariable());
 
                     VersioningStyle.FromGlobalVariable(versioningStyle);
-                    //StartDate = DateTime.Parse(GlobalVariables.GetGlobalVariable(SolutionItem.Globals, Resources.GlobalVarName_startDate, "1975/10/21"));*/
+                    StartDate = DateTime.Parse(GetProjectVariable(autoVersionElement, "startDate", "21/10/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
                 }
 
             }
@@ -207,14 +188,15 @@ namespace AutoVersion
             autoVersionElement.Add(new XAttribute("versioningStyle", VersioningStyle.ToGlobalVariable()));
 
             if (!string.IsNullOrEmpty(VersionFilename))
-            {
                 autoVersionElement.Add(new XAttribute("versionFilename", VersionFilename));
-            }
+
+            if (!string.IsNullOrEmpty(VersionFilePackage))
+                autoVersionElement.Add(new XAttribute("versionFilePackage", VersionFilePackage));
 
             if (BuildAction != BuildActionType.Both)
-            {
                 autoVersionElement.Add(new XAttribute("buildAction", BuildAction.ToString()));
-            }
+
+            autoVersionElement.Add(new XAttribute("StartDate", StartDate.ToString(System.Globalization.CultureInfo.InvariantCulture)));
 
             projectVersionDocument.Add(autoVersionElement);
 

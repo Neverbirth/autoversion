@@ -58,7 +58,7 @@ namespace AutoVersion
             if (!string.IsNullOrEmpty(IncrementSettings.VersionFilename))
             {
                 filename = IncrementSettings.VersionFilename;
-                //                return Common.MakeAbsolutePath(basePath, solutionItem.IncrementSettings.AssemblyInfoFilename);
+                return Utils.IOUtils.MakeAbsolutePath(basePath + Path.DirectorySeparatorChar, filename);
             }
 
             return Path.Combine(basePath, filename);
@@ -104,11 +104,12 @@ namespace AutoVersion
         public void SaveVersion()
         {
             string versionFile = GetVersionFilename();
+            
             using (FileStream fileStream = new FileStream(versionFile, FileMode.Create, FileAccess.Write))
             {
                 using (StreamWriter writer = new StreamWriter(fileStream, new UTF8Encoding(false)))
                 {
-                    writer.WriteLine("package ");
+                    writer.WriteLine("package " + IncrementSettings.VersionFilePackage);
                     writer.WriteLine("{");
                     writer.WriteLine("	public final class Version");
                     writer.WriteLine("	{");
