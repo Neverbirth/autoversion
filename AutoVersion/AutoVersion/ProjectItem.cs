@@ -104,10 +104,11 @@ namespace AutoVersion
         public void SaveVersion()
         {
             string versionFile = GetVersionFilename();
-            
+            Encoding encoding = Encoding.GetEncoding((Int32)PluginCore.PluginBase.Settings.DefaultCodePage);
+
             using (FileStream fileStream = new FileStream(versionFile, FileMode.Create, FileAccess.Write))
             {
-                using (StreamWriter writer = new StreamWriter(fileStream, new UTF8Encoding(false)))
+                using (StreamWriter writer = new StreamWriter(fileStream, encoding))
                 {
                     writer.WriteLine("package " + IncrementSettings.VersionFilePackage);
                     writer.WriteLine("{");
