@@ -164,7 +164,7 @@ namespace AutoVersion
                     string versioningStyle = GetProjectVariable(autoVersionElement, "versioningStyle", VersioningStyle.GetDefaultGlobalVariable());
 
                     VersioningStyle.FromGlobalVariable(versioningStyle);
-                    StartDate = DateTime.Parse(GetProjectVariable(autoVersionElement, "startDate", "21/10/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
+                    StartDate = DateTime.Parse(GetProjectVariable(autoVersionElement, "startDate", "10/21/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
                 }
 
             }
