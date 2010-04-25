@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PluginCore.Helpers;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -64,6 +66,24 @@ namespace AutoVersion
             return Path.Combine(basePath, filename);
         }
 
+        private string GetVersionDataContent(string fileName)
+        {
+            if (string.IsNullOrEmpty(IncrementSettings.VersionTemplateFilename))
+            {
+                return ParseTemplateData(Properties.Resources.DefaultVersioningTemplate, fileName);
+            }
+            else
+            {
+                string basePath = Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath);
+                string templatePath = Utils.IOUtils.MakeAbsolutePath(basePath + Path.DirectorySeparatorChar, IncrementSettings.VersionTemplateFilename);
+                string templateData = FileHelper.ReadFile(templatePath);
+
+                templateData = ParseTemplateData(templateData, fileName);
+
+                return templateData;
+            }
+        }
+
         private string GetVersionDataValue(string versionData, string pattern)
         {
             try
@@ -88,17 +108,58 @@ namespace AutoVersion
             }
             else
             {
-                string fileVersionData = File.ReadAllText(versionFile);
+                string fileVersionData = FileHelper.ReadFile(versionFile);
 
-                string major = GetVersionDataValue(fileVersionData, @"static public const Major:int = (\d+);");
-                string minor = GetVersionDataValue(fileVersionData, @"static public const Minor:int = (\d+);");
-                string build = GetVersionDataValue(fileVersionData, @"static public const Build:int = (\d+);");
-                string revision = GetVersionDataValue(fileVersionData, @"static public const Revision:int = (\d+);");
-                
-                version = new Version(major + "." + minor + "." + build + "." + revision);
+                if (string.IsNullOrEmpty(IncrementSettings.VersionTemplateFilename))
+                {
+                    string major = GetVersionDataValue(fileVersionData, @"static public const Major:int = (\d+);");
+                    string minor = GetVersionDataValue(fileVersionData, @"static public const Minor:int = (\d+);");
+                    string build = GetVersionDataValue(fileVersionData, @"static public const Build:int = (\d+);");
+                    string revision = GetVersionDataValue(fileVersionData, @"static public const Revision:int = (\d+);");
+
+                    version = new Version(major + "." + minor + "." + build + "." + revision);
+                }
+                else
+                {
+                    version = new Version(1, 0, 0, 0);
+                }
             }
 
             this.Version = version;
+        }
+
+        private string ParseTemplateData(string content, string fileName)
+        {
+            // Process common args
+            content = PluginCore.PluginBase.MainForm.ProcessArgString(content);
+
+            // Process other args with needed info
+            content = content.Replace("$(FileName)", fileName);
+
+            if (content.Contains("$(FileNameWithPackage)") || content.Contains("$(Package)"))
+            {
+                string package = IncrementSettings.VersionFilePackage;
+
+                content = content.Replace("$(Package)", package);
+
+                if (package != "")
+                    content = content.Replace("$(FileNameWithPackage)", package + "." + fileName);
+                else
+                    content = content.Replace("$(FileNameWithPackage)", fileName);
+            }
+
+            // Process action points just in case...
+            content = content.Replace(SnippetHelper.BOUNDARY, string.Empty).
+                Replace(SnippetHelper.ENTRYPOINT, string.Empty).
+                Replace(SnippetHelper.EXITPOINT, string.Empty);
+
+            // Process AutoVersion args
+            content = content.Replace("$(Major)", Version.Major.ToString()).
+                Replace("$(Minor)", Version.Minor.ToString()).
+                Replace("$(Build)", Version.Build.ToString()).
+                Replace("$(Revision)", Version.Revision.ToString());
+
+            return content;
         }
 
         public void SaveVersion()
@@ -106,22 +167,8 @@ namespace AutoVersion
             string versionFile = GetVersionFilename();
             Encoding encoding = Encoding.GetEncoding((Int32)PluginCore.PluginBase.Settings.DefaultCodePage);
 
-            using (FileStream fileStream = new FileStream(versionFile, FileMode.Create, FileAccess.Write))
-            {
-                using (StreamWriter writer = new StreamWriter(fileStream, encoding))
-                {
-                    writer.WriteLine("package " + IncrementSettings.VersionFilePackage);
-                    writer.WriteLine("{");
-                    writer.WriteLine("	public final class Version");
-                    writer.WriteLine("	{");
-                    writer.WriteLine("		static public const Major:int = " + Version.Major.ToString() + ";");
-                    writer.WriteLine("		static public const Minor:int = " + Version.Minor.ToString() + ";");
-                    writer.WriteLine("		static public const Build:int = " + Version.Build.ToString() + ";");
-                    writer.WriteLine("		static public const Revision:int = " + Version.Revision.ToString() + ";");
-                    writer.WriteLine("	}");
-                    writer.WriteLine("}");
-                }
-            }
+            FileHelper.WriteFile(versionFile, GetVersionDataContent(Path.GetFileNameWithoutExtension(versionFile)), 
+                encoding, PluginCore.PluginBase.Settings.SaveUnicodeWithBOM);
         }
 
         #endregion

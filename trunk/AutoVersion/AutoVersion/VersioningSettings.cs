@@ -81,6 +81,25 @@ namespace AutoVersion
         [Category("Increment Settings"), Description("The start date to use."), DisplayName("Start Date"), DefaultValue(typeof(DateTime), "1975/10/21")]
         public DateTime StartDate { get; set; }
 
+        private string _versionTemplateFilename = string.Empty;
+        /// <summary>
+        /// Gets or sets the version info filename.
+        /// </summary>
+        /// <value>The version info filename.</value>
+        [Category("Increment Settings")]
+        [Description("Use this value if you want to use a class different to the default one. ")]
+        [DefaultValue("")]
+        [DisplayName("Version Class Template")]
+        [EditorAttribute(typeof(FileNameEditor), typeof(UITypeEditor))]
+        public string VersionTemplateFilename
+        {
+            get { return _versionTemplateFilename; }
+            set
+            {
+                _versionTemplateFilename = !string.IsNullOrEmpty(value) ? Utils.IOUtils.MakeRelativePath(PluginBase.CurrentProject.ProjectPath, value) : string.Empty;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether this instance is using UTC.
         /// </summary>
@@ -151,6 +170,7 @@ namespace AutoVersion
                     AutoUpdateVersionData = bool.Parse(GetProjectVariable(autoVersionElement, "autoUpdateVersionData", "false"));
                     VersionFilename = GetProjectVariable(autoVersionElement, "versionFilename", string.Empty);
                     VersionFilePackage = GetProjectVariable(autoVersionElement, "versionFilePackage", string.Empty);
+                    VersionTemplateFilename = GetProjectVariable(autoVersionElement, "versionTemplateFilename", string.Empty);
 
                     try
                     {
@@ -192,6 +212,9 @@ namespace AutoVersion
 
             if (!string.IsNullOrEmpty(VersionFilePackage))
                 autoVersionElement.Add(new XAttribute("versionFilePackage", VersionFilePackage));
+
+            if (!string.IsNullOrEmpty(VersionTemplateFilename))
+                autoVersionElement.Add(new XAttribute("versionTemplateFilename", VersionTemplateFilename));
 
             if (BuildAction != BuildActionType.Both)
                 autoVersionElement.Add(new XAttribute("buildAction", BuildAction.ToString()));
