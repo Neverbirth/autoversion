@@ -201,12 +201,13 @@ namespace AutoVersion
         /// <param name="buildStartDate">The build start date.</param>
         /// <param name="projectStartDate">The project start date.</param>
         /// <returns>The incremented version.</returns>
-        internal Version Increment(Version currentVersion, DateTime buildStartDate, DateTime projectStartDate)
+        internal Version Increment(Version currentVersion, DateTime buildStartDate, DateTime projectStartDate, string projectFilePath)
         {
-            int major = Major == null ? currentVersion.Major : Major.Increment(currentVersion.Major, buildStartDate, projectStartDate, "");
-            int minor = Minor == null ? currentVersion.Minor : Minor.Increment(currentVersion.Minor, buildStartDate, projectStartDate, "");
-            int build = Build == null ? currentVersion.Build : Build.Increment(currentVersion.Build, buildStartDate, projectStartDate, "");
-            int revision = Revision == null ? currentVersion.Revision : Revision.Increment(currentVersion.Revision, buildStartDate, projectStartDate, "");
+
+            int major = Major == null ? currentVersion.Major : Major.Increment(currentVersion.Major, buildStartDate, projectStartDate, projectFilePath);
+            int minor = Minor == null ? currentVersion.Minor : Minor.Increment(currentVersion.Minor, buildStartDate, projectStartDate, projectFilePath);
+            int build = Build == null ? currentVersion.Build : Build.Increment(currentVersion.Build, buildStartDate, projectStartDate, projectFilePath);
+            int revision = Revision == null ? currentVersion.Revision : Revision.Increment(currentVersion.Revision, buildStartDate, projectStartDate, projectFilePath);
 
             return new Version(major, minor, build, revision);
         }
