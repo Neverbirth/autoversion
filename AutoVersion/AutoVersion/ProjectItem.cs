@@ -103,7 +103,7 @@ namespace AutoVersion
 
         private string GetVersionDataValueFromTemplate(string versionData, string[] templateLines, string versionArg)
         {
-            string dataLine = templateLines.FirstOrDefault((x) => x.Contains("$(Major)"));
+            string dataLine = templateLines.FirstOrDefault((x) => x.Contains(versionArg));
 
             if (string.IsNullOrEmpty(dataLine)) return "0";
 

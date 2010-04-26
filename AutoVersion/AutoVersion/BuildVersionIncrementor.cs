@@ -111,7 +111,8 @@ namespace AutoVersion
             {
                 _projectItem.Version = _projectItem.IncrementSettings.VersioningStyle.Increment(_projectItem.Version,
                                                                          _projectItem.IncrementSettings.IsUniversalTime ? DateTime.UtcNow : DateTime.Now,
-                                                                         _projectItem.IncrementSettings.StartDate);
+                                                                         _projectItem.IncrementSettings.StartDate,
+                                                                         PluginBase.CurrentProject.ProjectPath);
 
                 _projectItem.SaveVersion();
             }
