@@ -100,6 +100,22 @@ namespace AutoVersion
             }
         }
 
+        private bool _incrementBeforeBuild;
+        /// <summary>
+        /// Gets or set if the increment should happen before or after the current build.
+        /// </summary>
+        /// <remarks>WorkItem 3589 from PeteBSC</remarks>
+        /// <value>The new value for this property.</value>
+        [Category("Condition")]
+        [Description("If the increment should be executed before the build. Incrementing after build is complete doesn't work with Flash IDE projects.")]
+        [DisplayName("Increment Before Build")]
+        [DefaultValue(true)]
+        public bool IncrementBeforeBuild
+        {
+            get { return _incrementBeforeBuild; }
+            set { _incrementBeforeBuild = value; }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether this instance is using UTC.
         /// </summary>
@@ -171,6 +187,7 @@ namespace AutoVersion
                     VersionFilename = GetProjectVariable(autoVersionElement, "versionFilename", string.Empty);
                     VersionFilePackage = GetProjectVariable(autoVersionElement, "versionFilePackage", string.Empty);
                     VersionTemplateFilename = GetProjectVariable(autoVersionElement, "versionTemplateFilename", string.Empty);
+                    IncrementBeforeBuild = bool.Parse(GetProjectVariable(autoVersionElement, "incrementBeforeBuild", "true"));
 
                     try
                     {
@@ -219,7 +236,9 @@ namespace AutoVersion
             if (BuildAction != BuildActionType.Both)
                 autoVersionElement.Add(new XAttribute("buildAction", BuildAction.ToString()));
 
-            autoVersionElement.Add(new XAttribute("StartDate", StartDate.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            autoVersionElement.Add(new XAttribute("startDate", StartDate.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+
+            autoVersionElement.Add(new XAttribute("incrementBeforeBuild", IncrementBeforeBuild.ToString()));
 
             projectVersionDocument.Add(autoVersionElement);
 

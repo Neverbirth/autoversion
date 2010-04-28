@@ -106,6 +106,10 @@ namespace AutoVersion
         {
             switch (((DataEvent)e).Action)
             {
+                case "ProjectManager.BuildComplete":
+                    _incrementor.OnBuildComplete();
+                    break;
+
                 case "ProjectManager.BuildingProject":
                     _incrementor.OnBuilding(BuildAction.Building);
                     break;
@@ -137,6 +141,9 @@ namespace AutoVersion
 
                 toolsMenu.DropDownItems.Insert(0, _versionMenuItem);
                 toolsMenu.DropDownItems.Insert(1, new ToolStripSeparator());
+                // Comment two previous lines, and uncomment these two ones if you are using ExportProject plugin.
+//                toolsMenu.DropDownItems.Add(new ToolStripSeparator());
+//                toolsMenu.DropDownItems.Add(_versionMenuItem);
             }
         }
 

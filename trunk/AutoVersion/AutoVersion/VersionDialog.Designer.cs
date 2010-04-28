@@ -49,16 +49,20 @@
             // 
             // PropertyGridSettings
             // 
-            this.PropertyGridSettings.Location = new System.Drawing.Point(15, 48);
+            this.PropertyGridSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.PropertyGridSettings.Location = new System.Drawing.Point(16, 42);
             this.PropertyGridSettings.Name = "PropertyGridSettings";
             this.PropertyGridSettings.PropertySort = System.Windows.Forms.PropertySort.Categorized;
-            this.PropertyGridSettings.Size = new System.Drawing.Size(267, 178);
+            this.PropertyGridSettings.Size = new System.Drawing.Size(294, 194);
             this.PropertyGridSettings.TabIndex = 5;
             // 
             // ButtonCancel
             // 
+            this.ButtonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ButtonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.ButtonCancel.Location = new System.Drawing.Point(120, 232);
+            this.ButtonCancel.Location = new System.Drawing.Point(147, 248);
             this.ButtonCancel.Name = "ButtonCancel";
             this.ButtonCancel.Size = new System.Drawing.Size(75, 23);
             this.ButtonCancel.TabIndex = 6;
@@ -67,8 +71,9 @@
             // 
             // ButtonOk
             // 
+            this.ButtonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ButtonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.ButtonOk.Location = new System.Drawing.Point(208, 232);
+            this.ButtonOk.Location = new System.Drawing.Point(235, 248);
             this.ButtonOk.Name = "ButtonOk";
             this.ButtonOk.Size = new System.Drawing.Size(75, 23);
             this.ButtonOk.TabIndex = 7;
@@ -77,31 +82,35 @@
             // 
             // SimpleNumericTextBoxBuild
             // 
-            this.SimpleNumericTextBoxBuild.Location = new System.Drawing.Point(176, 16);
+            this.SimpleNumericTextBoxBuild.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.SimpleNumericTextBoxBuild.Location = new System.Drawing.Point(191, 16);
             this.SimpleNumericTextBoxBuild.Name = "SimpleNumericTextBoxBuild";
-            this.SimpleNumericTextBoxBuild.Size = new System.Drawing.Size(50, 20);
+            this.SimpleNumericTextBoxBuild.Size = new System.Drawing.Size(56, 20);
             this.SimpleNumericTextBoxBuild.TabIndex = 3;
             // 
             // SimpleNumericTextBoxMinor
             // 
             this.SimpleNumericTextBoxMinor.AcceptsReturn = true;
-            this.SimpleNumericTextBoxMinor.Location = new System.Drawing.Point(120, 16);
+            this.SimpleNumericTextBoxMinor.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.SimpleNumericTextBoxMinor.Location = new System.Drawing.Point(129, 16);
             this.SimpleNumericTextBoxMinor.Name = "SimpleNumericTextBoxMinor";
-            this.SimpleNumericTextBoxMinor.Size = new System.Drawing.Size(50, 20);
+            this.SimpleNumericTextBoxMinor.Size = new System.Drawing.Size(56, 20);
             this.SimpleNumericTextBoxMinor.TabIndex = 2;
             // 
             // SimpleNumericTextBoxMajor
             // 
-            this.SimpleNumericTextBoxMajor.Location = new System.Drawing.Point(64, 16);
+            this.SimpleNumericTextBoxMajor.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.SimpleNumericTextBoxMajor.Location = new System.Drawing.Point(67, 16);
             this.SimpleNumericTextBoxMajor.Name = "SimpleNumericTextBoxMajor";
-            this.SimpleNumericTextBoxMajor.Size = new System.Drawing.Size(50, 20);
+            this.SimpleNumericTextBoxMajor.Size = new System.Drawing.Size(56, 20);
             this.SimpleNumericTextBoxMajor.TabIndex = 1;
             // 
             // SimpleNumericTextBoxRevision
             // 
-            this.SimpleNumericTextBoxRevision.Location = new System.Drawing.Point(232, 16);
+            this.SimpleNumericTextBoxRevision.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.SimpleNumericTextBoxRevision.Location = new System.Drawing.Point(253, 16);
             this.SimpleNumericTextBoxRevision.Name = "SimpleNumericTextBoxRevision";
-            this.SimpleNumericTextBoxRevision.Size = new System.Drawing.Size(50, 20);
+            this.SimpleNumericTextBoxRevision.Size = new System.Drawing.Size(56, 20);
             this.SimpleNumericTextBoxRevision.TabIndex = 0;
             // 
             // VersionDialog
@@ -110,7 +119,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.ButtonCancel;
-            this.ClientSize = new System.Drawing.Size(292, 266);
+            this.ClientSize = new System.Drawing.Size(319, 282);
             this.Controls.Add(this.ButtonOk);
             this.Controls.Add(this.ButtonCancel);
             this.Controls.Add(this.PropertyGridSettings);
