@@ -2,7 +2,7 @@
 #labels Featured,Phase-Requirements
 
  * AutoVersion 1.0:
-  * Add global settings as well as settings per project.
+  * Add global settings as well.
   * Detect language used and not only AS3 project.
   * Add SmartUpdate setting.
 
