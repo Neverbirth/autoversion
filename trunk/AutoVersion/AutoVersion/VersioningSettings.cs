@@ -100,7 +100,7 @@ namespace AutoVersion
             }
         }
 
-        private bool _incrementBeforeBuild = true;
+        private bool _incrementBeforeBuild;
         /// <summary>
         /// Gets or set if the increment should happen before or after the current build.
         /// </summary>
@@ -178,31 +178,35 @@ namespace AutoVersion
         {
             try
             {
+                XDocument projectVersionDocument;
+
                 if (File.Exists(_versionFile))
+                    projectVersionDocument = XDocument.Load(_versionFile);
+                else
+                    projectVersionDocument = new XDocument(new XDeclaration("1.0", "UTF-8", "yes"),
+                        new XElement("autoVersion"));
+
+                XElement autoVersionElement = projectVersionDocument.Element("autoVersion");
+
+                AutoUpdateVersionData = bool.Parse(GetProjectVariable(autoVersionElement, "autoUpdateVersionData", "false"));
+                VersionFilename = GetProjectVariable(autoVersionElement, "versionFilename", string.Empty);
+                VersionFilePackage = GetProjectVariable(autoVersionElement, "versionFilePackage", string.Empty);
+                VersionTemplateFilename = GetProjectVariable(autoVersionElement, "versionTemplateFilename", string.Empty);
+                IncrementBeforeBuild = bool.Parse(GetProjectVariable(autoVersionElement, "incrementBeforeBuild", "true"));
+
+                try
                 {
-                    XDocument projectVersionDocument = XDocument.Load(_versionFile);
-                    XElement autoVersionElement = projectVersionDocument.Element("autoVersion");
-
-                    AutoUpdateVersionData = bool.Parse(GetProjectVariable(autoVersionElement, "autoUpdateVersionData", "false"));
-                    VersionFilename = GetProjectVariable(autoVersionElement, "versionFilename", string.Empty);
-                    VersionFilePackage = GetProjectVariable(autoVersionElement, "versionFilePackage", string.Empty);
-                    VersionTemplateFilename = GetProjectVariable(autoVersionElement, "versionTemplateFilename", string.Empty);
-                    IncrementBeforeBuild = bool.Parse(GetProjectVariable(autoVersionElement, "incrementBeforeBuild", "true"));
-
-                    try
-                    {
-                        BuildAction = (BuildActionType)Enum.Parse(typeof(BuildActionType), GetProjectVariable(autoVersionElement, "buildAction", "Both"));
-                    }
-                    catch (ArgumentException)
-                    {
-                        BuildAction = BuildActionType.Both;
-                    }
-
-                    string versioningStyle = GetProjectVariable(autoVersionElement, "versioningStyle", VersioningStyle.GetDefaultGlobalVariable());
-
-                    VersioningStyle.FromGlobalVariable(versioningStyle);
-                    StartDate = DateTime.Parse(GetProjectVariable(autoVersionElement, "startDate", "10/21/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
+                    BuildAction = (BuildActionType)Enum.Parse(typeof(BuildActionType), GetProjectVariable(autoVersionElement, "buildAction", "Both"));
                 }
+                catch (ArgumentException)
+                {
+                    BuildAction = BuildActionType.Both;
+                }
+
+                string versioningStyle = GetProjectVariable(autoVersionElement, "versioningStyle", VersioningStyle.GetDefaultGlobalVariable());
+
+                VersioningStyle.FromGlobalVariable(versioningStyle);
+                StartDate = DateTime.Parse(GetProjectVariable(autoVersionElement, "startDate", "10/21/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
 
             }
             catch (Exception ex)
