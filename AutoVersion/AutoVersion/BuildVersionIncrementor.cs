@@ -18,9 +18,16 @@ namespace AutoVersion
         Testing
     }
 
+    internal enum BuildState : byte
+    {
+        BuildInProgress,
+        BuildDone
+    }
+
     internal class BuildVersionIncrementor : IDisposable
     {
         private BuildAction _currentBuildAction;
+        private BuildState _currentBuildState;
         private PluginMain _pluginMain;
         private ProjectItem _projectItem;
         private DateTime _buildStartDate = DateTime.MinValue;
@@ -109,18 +116,33 @@ namespace AutoVersion
                   (settings.BuildAction == BuildActionType.Build && _currentBuildAction == BuildAction.Building) ||
                   (settings.BuildAction == BuildActionType.Testing && _currentBuildAction == BuildAction.Testing))
             {
-                _projectItem.Version = _projectItem.IncrementSettings.VersioningStyle.Increment(_projectItem.Version,
-                                                                         _projectItem.IncrementSettings.IsUniversalTime ? DateTime.UtcNow : DateTime.Now,
-                                                                         _projectItem.IncrementSettings.StartDate,
-                                                                         PluginBase.CurrentProject.ProjectPath);
+                if (_projectItem.IncrementSettings.IncrementBeforeBuild == (_currentBuildState == BuildState.BuildInProgress))
+                {
 
-                _projectItem.SaveVersion();
+                    _projectItem.Version = _projectItem.IncrementSettings.VersioningStyle.Increment(
+                        _projectItem.Version,
+                        _projectItem.IncrementSettings.IsUniversalTime
+                            ? _buildStartDate.ToUniversalTime()
+                            : _buildStartDate,
+                        _projectItem.IncrementSettings.StartDate,
+                        PluginBase.CurrentProject.ProjectPath);
+
+                    _projectItem.SaveVersion();
+
+                }
             }
+        }
+
+        public void OnBuildComplete()
+        {
+            _currentBuildState = BuildState.BuildDone;
+            ExecuteIncrement();
         }
 
         public void OnBuilding(BuildAction action)
         {
             _currentBuildAction = action;
+            _currentBuildState = BuildState.BuildInProgress;
             _buildStartDate = DateTime.Now;
 
             ExecuteIncrement();
