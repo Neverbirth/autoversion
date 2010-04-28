@@ -1,0 +1,12 @@
+#summary List of main features/changes to make for each version.
+#labels Featured,Phase-Requirements
+
+ * AutoVersion 1.0:
+  * Add global settings as well as settings per project.
+  * Detect language used and not only AS3 project.
+  * Add SmartUpdate setting.
+
+ * AutoVersion 1.1:
+  * Add setting to update AIR application.xml file.
+  * Misc optimizations.
+  * Make a simple "multi-incrementor" plugin for the people that have requested for it.
