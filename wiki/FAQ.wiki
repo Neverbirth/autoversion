@@ -1,0 +1,35 @@
+#summary This Wiki entry aims to provide a list of answers to common questions regarding AutoVersion plugin or related subjects.
+#labels Featured
+
+==General Questions==
+
+  # Why versioning ActionScript based projects?
+  Unlike native OS binaries, SWF files don't have a native version info associaed with them. To overcome this Adobe added the possibility to embed XMP data into the compiled SWFs, however, using this method is not always possible or desirable.
+  Versioning SWF files can be of interest, specially on large projects, to track down changes, bugs, etc.
+
+  # There are already other versioning utilities and plugins availble for FlashDevelop, mainly Version by Jean Louis Persat, so why AutoVersion?
+  The other tools don't provide the versioning features my team need, so AutoVersion was developed in order to cover them. I just wanted to publicly release it so other people could use it as well, and help/force me to improve it. Nothing else, people should choose whatever tool suits them better.
+
+==AutoVersion Questions==
+  # Where can I locate the AutoVersion menu?
+  AutoVersion dialog is by default located in the Tools menu as the first item.
+
+  # OK, how do I use it?
+  In order to enable it you must first enable the "Update version data" option, and choose whatever versioning style fits in your project.
+
+  # I'd like to use latest SVN revision number for my versioning scheme, could you add support for it?
+  Sorry, but this versioning style isn't natively supported. You could try to convert [http://happyturtle.codeplex.com/ Happy Turtle] for AutoVersion. Look at the BVI Questions section for more details.
+
+  # The class created by AutoVersion doesn't meet the format I use or I'd like.
+  You can create your own template and configure the plugin to use it instead of the default template that comes together with AutoVersion.
+  The template syntax uses the same arguments as common FlashDevelop templates, along with $(Major), $(Minor), $(Build) and $(Revision) to print the different version parts.
+
+  # This is all great, but I don't use FlashDevelop to write AS3 projects, can I still use AutoVersion?
+  Yes, although detecting the language used is still unimplemented, you can create your own templates matching your project type, and use them.
+
+==BVI Questions==
+  # Why using BVI as the base of AutoVersion?
+  The people behind BVI is doing a great work with the project, making AutoVersion extensible is something I wanted from the start and they already provided it, they also provide the versioning scheme my team uses. Lastly, porting BVI code to make a FlashDevelop plugin was rather easy. Of course, all the hard work merit is for them.
+
+  # I'd like to use a BVI plugin with AutoVersion, is it possible?
+  BVI currently uses an abstract class to extend its versioning styles. However, this abstract class is located inside the BVI assembly, so, in theory, you could use BVI plugins by changing their reference of BVI to the AutoVersion assembly, change the plugin incrementor base class to the AutoVersion one, and just recompile it.
