@@ -100,7 +100,7 @@ namespace AutoVersion
             }
         }
 
-        private bool _incrementBeforeBuild;
+        private bool _incrementBeforeBuild = true;
         /// <summary>
         /// Gets or set if the increment should happen before or after the current build.
         /// </summary>
