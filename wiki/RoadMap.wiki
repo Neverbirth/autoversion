@@ -7,6 +7,7 @@
   * Add SmartUpdate setting.
 
  * AutoVersion 1.1:
+  * Check for the project classpaths to define which should be the default location to store Version.as.
   * Add setting to update AIR application.xml file.
   * Misc optimizations.
   * Make a simple "multi-incrementor" plugin for the people that have requested for it.
