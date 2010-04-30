@@ -19,9 +19,17 @@ namespace AutoVersion
         /// </summary>
         None,
         /// <summary>
+        /// ActionScript 2
+        /// </summary>
+        ActionScript2,
+        /// <summary>
         /// ActionScript 3
         /// </summary>
-        ActionScript3
+        ActionScript3,
+        /// <summary>
+        /// haXe
+        /// </summary>
+        Haxe
     }
 
     /// <summary>
@@ -44,7 +52,20 @@ namespace AutoVersion
         {
             this.IncrementSettings = new ProjectItemIncrementSettings();
             this.IncrementSettings.Load();
-            this.ProjectType = LanguageType.ActionScript3;
+
+            switch (PluginCore.PluginBase.CurrentProject.Language)
+            {
+                case "as2":
+                    this.ProjectType = LanguageType.ActionScript2;
+                    break;
+                case "haxe":
+                    this.ProjectType = LanguageType.Haxe;
+                    break;
+                default:
+                    this.ProjectType = LanguageType.ActionScript3;
+                    break;
+            }
+
             this.LoadVersion();
         }
 
@@ -59,8 +80,36 @@ namespace AutoVersion
 
         private string GetTemplateFileName()
         {
-            string basePath = Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath);
-            return Utils.IOUtils.MakeAbsolutePath(basePath + Path.DirectorySeparatorChar, IncrementSettings.VersionTemplateFilename);
+            string basePath, retVal;
+
+            if (string.IsNullOrEmpty(IncrementSettings.VersionTemplateFilename))
+            {
+                string fileName;
+
+                basePath = Path.Combine(PathHelper.TemplateDir, "AutoVersion");
+
+                switch (ProjectType)
+                {
+                    case LanguageType.ActionScript2:
+                        fileName = "ActionScript 2.fdt";
+                        break;
+                    case LanguageType.Haxe:
+                        fileName = "ActionScript 3.fdt";
+                        break;
+                    default:
+                        fileName = "haXe.fdt";
+                        break;
+                }
+
+                retVal = Path.Combine(basePath, fileName);
+            }
+            else
+            {
+                basePath = Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath);
+                retVal = Utils.IOUtils.MakeAbsolutePath(basePath + Path.DirectorySeparatorChar, IncrementSettings.VersionTemplateFilename);
+            }
+
+            return retVal;
         }
 
         public string GetVersionFilename()
@@ -79,18 +128,11 @@ namespace AutoVersion
 
         private string GetVersionDataContent(string fileName)
         {
-            if (string.IsNullOrEmpty(IncrementSettings.VersionTemplateFilename))
-            {
-                return ParseTemplateData(Properties.Resources.DefaultVersioningTemplate, fileName);
-            }
-            else
-            {
-                string templateData = FileHelper.ReadFile(GetTemplateFileName());
+            string templateData = FileHelper.ReadFile(GetTemplateFileName());
 
-                templateData = ParseTemplateData(templateData, fileName);
+            templateData = ParseTemplateData(templateData, fileName);
 
-                return templateData;
-            }
+            return templateData;
         }
 
         private string GetVersionDataValue(string versionData, string pattern)
@@ -205,7 +247,7 @@ namespace AutoVersion
             string versionFile = GetVersionFilename();
             Encoding encoding = Encoding.GetEncoding((Int32)PluginCore.PluginBase.Settings.DefaultCodePage);
 
-            FileHelper.WriteFile(versionFile, GetVersionDataContent(Path.GetFileNameWithoutExtension(versionFile)), 
+            FileHelper.WriteFile(versionFile, GetVersionDataContent(Path.GetFileNameWithoutExtension(versionFile)),
                 encoding, PluginCore.PluginBase.Settings.SaveUnicodeWithBOM);
         }
 
