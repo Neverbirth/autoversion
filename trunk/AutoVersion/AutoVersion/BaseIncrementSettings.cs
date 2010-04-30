@@ -9,7 +9,7 @@ namespace AutoVersion
     /// <summary>
     /// Abtract class containing all common increment settings (global/solutionitem).
     /// </summary>
-    /// <seealso cref="SolutionItemIncrementSettings"/>
+    /// <seealso cref="ProjectItemIncrementSettings"/>
     /// <seealso cref="GlobalIncrementSettings"/>
     [DefaultProperty("VersioningStyle")]
     internal abstract class BaseIncrementSettings
@@ -25,6 +25,16 @@ namespace AutoVersion
         /// </value>
         [Category("Increment Settings"), Description("Auto update the version data."), DisplayName("Update version data"), DefaultValue(false)]
         public bool AutoUpdateVersionData { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating wether to only update version data, and not overwrite the whole file.
+        /// </summary>
+        /// <value><c>true</c> to enable Smart Update; otherwise, <c>false</c>.</value>
+        [Browsable(true)]
+        [Category("Increment Settings")]
+        [DisplayName("Smart Update")]
+        [Description("Set this option when the version file is prone to be modified and do not want to be overwritten each time. It may affect compilation time somewhat.")]
+        public bool SmartUpdate { get; set; }
 
         /// <summary>
         /// Gets or sets the start date.
@@ -55,8 +65,6 @@ namespace AutoVersion
             set { this._versioningStyle = value; }
         }
 
-        #endregion
-
         private bool _incrementBeforeBuild = true;
         /// <summary>
         /// Gets or set if the increment should happen before or after the current build.
@@ -80,6 +88,8 @@ namespace AutoVersion
         [Category("Condition"), DefaultValue(BuildActionType.Both), DisplayName("Build Action"), Description("Set this to the desired build action when the auto update should occur.")]
         public BuildActionType BuildAction { get; set; }
 
+        #endregion
+
         #region  Methods
 
         /// <summary>
@@ -92,6 +102,7 @@ namespace AutoVersion
             AutoUpdateVersionData = source.AutoUpdateVersionData;
             BuildAction = source.BuildAction;
             StartDate = source.StartDate;
+            SmartUpdate = source.SmartUpdate;
             IsUniversalTime = source.IsUniversalTime;
             IncrementBeforeBuild = source.IncrementBeforeBuild;
         }

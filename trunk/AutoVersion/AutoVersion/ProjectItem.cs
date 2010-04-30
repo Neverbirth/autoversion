@@ -180,27 +180,12 @@ namespace AutoVersion
             {
                 string fileVersionData = FileHelper.ReadFile(versionFile);
 
-                string major = "0";
-                string minor = "0";
-                string build = "0";
-                string revision = "0";
+                string[] templateLines = File.ReadAllLines(GetTemplateFileName());
 
-                if (string.IsNullOrEmpty(IncrementSettings.VersionTemplateFilename))
-                {
-                    major = GetVersionDataValue(fileVersionData, @"static public const Major:int = (\d+);");
-                    minor = GetVersionDataValue(fileVersionData, @"static public const Minor:int = (\d+);");
-                    build = GetVersionDataValue(fileVersionData, @"static public const Build:int = (\d+);");
-                    revision = GetVersionDataValue(fileVersionData, @"static public const Revision:int = (\d+);");
-                }
-                else
-                {
-                    string[] templateLines = File.ReadAllLines(GetTemplateFileName());
-
-                    major = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Major)");
-                    minor = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Minor)");
-                    build = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Build)");
-                    revision = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Revision)");
-                }
+                string major = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Major)");
+                string minor = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Minor)");
+                string build = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Build)");
+                string revision = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Revision)");
 
                 version = new Version(major + "." + minor + "." + build + "." + revision);
             }
@@ -247,8 +232,22 @@ namespace AutoVersion
             string versionFile = GetVersionFilename();
             Encoding encoding = Encoding.GetEncoding((Int32)PluginCore.PluginBase.Settings.DefaultCodePage);
 
-            FileHelper.WriteFile(versionFile, GetVersionDataContent(Path.GetFileNameWithoutExtension(versionFile)),
-                encoding, PluginCore.PluginBase.Settings.SaveUnicodeWithBOM);
+            if (!IncrementSettings.SmartUpdate || !File.Exists(versionFile))
+            {
+                FileHelper.WriteFile(versionFile, GetVersionDataContent(Path.GetFileNameWithoutExtension(versionFile)),
+                                     encoding, PluginCore.PluginBase.Settings.SaveUnicodeWithBOM);
+            }
+            else
+            {
+                string fileVersionData = FileHelper.ReadFile(versionFile);
+
+                string[] templateLines = File.ReadAllLines(GetTemplateFileName());
+
+                string major = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Major)");
+                string minor = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Minor)");
+                string build = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Build)");
+                string revision = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Revision)");
+            }
         }
 
         #endregion
