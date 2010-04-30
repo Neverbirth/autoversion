@@ -17,7 +17,7 @@ namespace AutoVersion
     /// Abtract class containing all common increment settings (global/solutionitem).
     /// </summary>
     [DefaultProperty("VersioningStyle")]
-    internal class VersioningSettings
+    internal class ProjectItemIncrementSettings : BaseIncrementSettings
     {
 
         #region  Fields
@@ -65,22 +65,6 @@ namespace AutoVersion
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether to auto update the file version.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> to auto update the file version; otherwise, <c>false</c>.
-        /// </value>
-        [Category("Increment Settings"), Description("Auto update the version data."), DisplayName("Update version data"), DefaultValue(false)]
-        public bool AutoUpdateVersionData { get; set; }
-
-        /// <summary>
-        /// Gets or sets the start date.
-        /// </summary>
-        /// <value>The start date.</value>
-        [Category("Increment Settings"), Description("The start date to use."), DisplayName("Start Date"), DefaultValue(typeof(DateTime), "1975/10/21")]
-        public DateTime StartDate { get; set; }
-
         private string _versionTemplateFilename = string.Empty;
         /// <summary>
         /// Gets or sets the version info filename.
@@ -100,61 +84,18 @@ namespace AutoVersion
             }
         }
 
-        private bool _incrementBeforeBuild;
         /// <summary>
-        /// Gets or set if the increment should happen before or after the current build.
+        /// Gets or sets if this project should use the global settings instead of it's own.
         /// </summary>
-        /// <remarks>WorkItem 3589 from PeteBSC</remarks>
-        /// <value>The new value for this property.</value>
-        [Category("Condition")]
-        [Description("If the increment should be executed before the build. Incrementing after build is complete doesn't work with Flash IDE projects.")]
-        [DisplayName("Increment Before Build")]
-        [DefaultValue(true)]
-        public bool IncrementBeforeBuild
-        {
-            get { return _incrementBeforeBuild; }
-            set { _incrementBeforeBuild = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance is using UTC.
-        /// </summary>
-        /// <value><c>true</c> if this instance is using UTC; otherwise, <c>false</c>.</value>
-        [Category("Increment Settings"), Description("Indicates wheter to use Coordinated Universal Time (UTC) time stamps."), DisplayName("Use Coordinated Universal Time"), DefaultValue(false)]
-        public bool IsUniversalTime { get; set; }
-
-        private VersioningStyle _versioningStyle = new VersioningStyle();
-        /// <summary>
-        /// Gets or sets the increment settings.
-        /// </summary>
-        /// <value>The increment settings.</value>
-        [Browsable(true)]
-        [Category("Increment Settings")]
-        [DisplayName("Versioning Style")]
-        [Description("The version increment style settings.")]
-        public VersioningStyle VersioningStyle
-        {
-            get { return this._versioningStyle; }
-            set { this._versioningStyle = value; }
-        }
-
-        private bool ShouldSerializeVersioningStyle()
-        {
-            return _versioningStyle.ToString() != "None.None.None.None";
-        }
-
-        /// <summary>
-        /// Gets or sets the build action
-        /// </summary>
-        /// <value>The build action on which the auto update should occur.</value>
-        [Category("Condition"), DefaultValue(BuildActionType.Both), DisplayName("Build Action"), Description("Set this to the desired build action when the auto update should occur.")]
-        public BuildActionType BuildAction { get; set; }
+        /// <value>The value</value>
+        [Category("Increment Settings"), Description("If the project should use the global settings instead of it's own."), DisplayName("Use Global Settings"), DefaultValue(false)]
+        public bool UseGlobalSettings { get; set; }
 
         #endregion
 
         #region  Constructor
 
-        public VersioningSettings()
+        public ProjectItemIncrementSettings()
         {
             _versionFile = Path.Combine(Path.GetDirectoryName(PluginBase.CurrentProject.ProjectPath),
                             Path.GetFileNameWithoutExtension(PluginBase.CurrentProject.ProjectPath) +
@@ -165,16 +106,10 @@ namespace AutoVersion
 
         #region  Methods
 
-        private string GetProjectVariable(XElement baseElement, string attributeName, string defaultValue)
-        {
-            XAttribute attribute = baseElement.Attribute(attributeName);
-            return attribute != null ? attribute.Value : defaultValue;
-        }
-
         /// <summary>
         /// Loads the settings into this instance.
         /// </summary>
-        public void Load()
+        public override void Load()
         {
             try
             {
@@ -188,25 +123,26 @@ namespace AutoVersion
 
                 XElement autoVersionElement = projectVersionDocument.Element("autoVersion");
 
-                AutoUpdateVersionData = bool.Parse(GetProjectVariable(autoVersionElement, "autoUpdateVersionData", "false"));
-                VersionFilename = GetProjectVariable(autoVersionElement, "versionFilename", string.Empty);
-                VersionFilePackage = GetProjectVariable(autoVersionElement, "versionFilePackage", string.Empty);
-                VersionTemplateFilename = GetProjectVariable(autoVersionElement, "versionTemplateFilename", string.Empty);
-                IncrementBeforeBuild = bool.Parse(GetProjectVariable(autoVersionElement, "incrementBeforeBuild", "true"));
+                AutoUpdateVersionData = bool.Parse(autoVersionElement.GetAttributeValue("autoUpdateVersionData", "false"));
+                VersionFilename = autoVersionElement.GetAttributeValue("versionFilename", string.Empty);
+                VersionFilePackage = autoVersionElement.GetAttributeValue("versionFilePackage", string.Empty);
+                VersionTemplateFilename = autoVersionElement.GetAttributeValue("versionTemplateFilename", string.Empty);
+                IncrementBeforeBuild = bool.Parse(autoVersionElement.GetAttributeValue("incrementBeforeBuild", "true"));
+                UseGlobalSettings = bool.Parse(autoVersionElement.GetAttributeValue("useGlobalSettings", (GlobalIncrementSettings.GetInstance().Apply == GlobalIncrementSettings.ApplyGlobalSettings.AsDefault).ToString()));
 
                 try
                 {
-                    BuildAction = (BuildActionType)Enum.Parse(typeof(BuildActionType), GetProjectVariable(autoVersionElement, "buildAction", "Both"));
+                    BuildAction = (BuildActionType)Enum.Parse(typeof(BuildActionType), autoVersionElement.GetAttributeValue("buildAction", "Both"));
                 }
                 catch (ArgumentException)
                 {
                     BuildAction = BuildActionType.Both;
                 }
 
-                string versioningStyle = GetProjectVariable(autoVersionElement, "versioningStyle", VersioningStyle.GetDefaultGlobalVariable());
+                string versioningStyle = autoVersionElement.GetAttributeValue("versioningStyle", VersioningStyle.GetDefaultGlobalVariable());
 
                 VersioningStyle.FromGlobalVariable(versioningStyle);
-                StartDate = DateTime.Parse(GetProjectVariable(autoVersionElement, "startDate", "10/21/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
+                StartDate = DateTime.Parse(autoVersionElement.GetAttributeValue("startDate", "10/21/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
 
             }
             catch (Exception ex)
@@ -219,7 +155,7 @@ namespace AutoVersion
         /// <summary>
         /// Saves the settings of this instance.
         /// </summary>
-        public void Save()
+        public override void Save()
         {
             XDocument projectVersionDocument = new XDocument(new XDeclaration("1.0", "UTF-8", "yes"));
 
@@ -241,8 +177,8 @@ namespace AutoVersion
                 autoVersionElement.Add(new XAttribute("buildAction", BuildAction.ToString()));
 
             autoVersionElement.Add(new XAttribute("startDate", StartDate.ToString(System.Globalization.CultureInfo.InvariantCulture)));
-
             autoVersionElement.Add(new XAttribute("incrementBeforeBuild", IncrementBeforeBuild.ToString()));
+            autoVersionElement.Add(new XAttribute("useGlobalSettings", UseGlobalSettings.ToString()));
 
             projectVersionDocument.Add(autoVersionElement);
 

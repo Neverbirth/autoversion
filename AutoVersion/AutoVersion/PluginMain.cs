@@ -58,7 +58,7 @@ namespace AutoVersion
 
         public object Settings
         {
-            get { return null; }
+            get { return GlobalIncrementSettings.GetInstance(); }
         }
 
         #endregion
@@ -82,6 +82,8 @@ namespace AutoVersion
 
         public void Dispose()
         {
+            GlobalIncrementSettings.GetInstance().Save();
+
             if (_incrementor != null)
             {
                 _incrementor.Dispose();
