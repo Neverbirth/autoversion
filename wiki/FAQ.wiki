@@ -12,6 +12,8 @@
   # The class created by AutoVersion doesn't meet the format I use or I'd like, could you change it?.
   # This is all great, but I don't use FlashDevelop to write AS3 projects, can I still use AutoVersion?
   # AutoVersion creates a file named <project name>.version under my project path, what is it?
+  # Is it possible to version two or more different projects located on the same folder?
+  # I'd like to use AutoVersion as a build counter, is the feature available?
  * [FAQ#BVI_Questions BVI Questions]:
   # Why using BVI as the base of AutoVersion?
   # I'd like to use a BVI plugin with AutoVersion, is it possible?
