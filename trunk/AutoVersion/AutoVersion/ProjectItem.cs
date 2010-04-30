@@ -33,7 +33,7 @@ namespace AutoVersion
         #region  Properties
 
         public Version Version { get; set; }
-        public VersioningSettings IncrementSettings { get; private set; }
+        public ProjectItemIncrementSettings IncrementSettings { get; private set; }
         public LanguageType ProjectType { get; set; }
 
         #endregion
@@ -42,7 +42,7 @@ namespace AutoVersion
 
         public ProjectItem()
         {
-            this.IncrementSettings = new VersioningSettings();
+            this.IncrementSettings = new ProjectItemIncrementSettings();
             this.IncrementSettings.Load();
             this.ProjectType = LanguageType.ActionScript3;
             this.LoadVersion();
@@ -51,6 +51,11 @@ namespace AutoVersion
         #endregion
 
         #region  Methods
+
+        public void ApplyGlobalSettings()
+        {
+            IncrementSettings.CopyFrom(GlobalIncrementSettings.GetInstance());
+        }
 
         private string GetTemplateFileName()
         {
@@ -205,5 +210,6 @@ namespace AutoVersion
         }
 
         #endregion
+
     }
 }

@@ -89,14 +89,13 @@ namespace AutoVersion
 
         private void ExecuteIncrement()
         {
-            /*            if (!GlobalAddinSettings.Default.IsEnabled)
-                        {
-                            return;
-                        }*/
-
             try
             {
                 _projectItem = new ProjectItem();
+
+                if (_projectItem.IncrementSettings.UseGlobalSettings)
+                    _projectItem.ApplyGlobalSettings();
+
                 UpdateProject();
             }
             catch (Exception ex)
@@ -111,7 +110,7 @@ namespace AutoVersion
         /// </summary>
         private void UpdateProject()
         {
-            VersioningSettings settings = _projectItem.IncrementSettings;
+            ProjectItemIncrementSettings settings = _projectItem.IncrementSettings;
             if (settings.BuildAction == BuildActionType.Both ||
                   (settings.BuildAction == BuildActionType.Build && _currentBuildAction == BuildAction.Building) ||
                   (settings.BuildAction == BuildActionType.Testing && _currentBuildAction == BuildAction.Testing))
