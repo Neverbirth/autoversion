@@ -48,6 +48,11 @@
  * AutoVersion creates a file named <project name>.version under my project path, what is it?
  That .version file is just a simple XML containing the AutoVersion project settings. It is saved that way so it can be easily shared between team members, and store it in a repository with no problems.
 
+ * Is it possible to version two or more different projects located on the same folder?
+ Yes, but you must make sure that the version data file name is different for all of them.
+
+ * I'd like to use AutoVersion as a build counter, is the feature available?
+ You can already use the Increment versioning style and your own template in order to have a build counter.
 
 ==BVI Questions==
 
