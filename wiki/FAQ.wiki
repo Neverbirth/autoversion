@@ -22,7 +22,7 @@
 ==General Questions==
 
  * Why versioning ActionScript based projects?
- Unlike native OS binaries, SWF files don't have a native version info associaed with them. To overcome this Adobe added the possibility to embed XMP data into the compiled SWFs, however, using this method is not always possible or desirable.
+ Unlike native OS binaries, SWF files don't have a native version info associaed with them. To overcome this, Adobe added the possibility to embed XMP data into the compiled SWFs, however, using this method is not always possible or desirable.
  Versioning SWF files can be of interest, specially on large projects, to track down changes, bugs, etc.
 
  * There are already other versioning utilities and plugins availble for FlashDevelop, mainly Version by Jean Louis Persat, so why AutoVersion?
@@ -43,7 +43,7 @@
  * The class created by AutoVersion doesn't meet the format I use or I'd like, how could I change it?.
  You can create your own template and configure the plugin to use it instead of the default template that comes together with AutoVersion.
  The template syntax uses the same arguments as common FlashDevelop templates, along with $(Major), $(Minor), $(Build) and $(Revision) to print the different version parts.
- Also, as from AutoVersion 1.0 the templates aren't embedded inside the assembly, so you can head to your user FlashDevelop templates folder, and modify the default templates. However, take into account that they may be overwritten with each new plugin release.
+ Also, as of AutoVersion 1.0 the templates aren't embedded inside the assembly, so you can head to your user FlashDevelop templates folder, and modify the default templates. However, take into account that they may be overwritten with each new plugin release.
 
  * This is all great, but I don't use FlashDevelop to write AS3 projects, can I still use AutoVersion?
  Yes, since version 1.0 AutoVersion also works for ActionScript 2 and haXe projects, and you can always use the custom template feature in order to further customize your versioning file.
@@ -56,6 +56,7 @@
 
  * I'd like to use AutoVersion as a build counter, is the feature available?
  You can already use the Increment versioning style and your own template in order to have a build counter.
+
 
 ==BVI Questions==
 
