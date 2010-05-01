@@ -1,6 +1,10 @@
 #summary List of main features/changes to make for each version.
 #labels Featured,Phase-Requirements
 
+ * Break:
+  * Further analyze the ExportProject plugin incompatibilities.
+  * Check Happy Turle plugin BVI.
+
  * AutoVersion 1.1:
   * Check for the project classpaths to define which should be the default location to store Version.as.
   * Add setting to update AIR application.xml file.
