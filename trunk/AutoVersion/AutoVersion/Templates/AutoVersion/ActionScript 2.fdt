@@ -1,0 +1,16 @@
+/**
+$(CBI)* ...
+$(CBI)* @author $(DefaultUser)
+$(CBI)*/
+class $(FileNameWithPackage) $(CSLB){
+		
+	static public var Major:int = $(Major);
+	static public var Minor:int = $(Minor);
+	static public var Build:int = $(Build);
+	static public var Revision:int = $(Revision);
+	
+	private function $(FileName)() $(CSLB){
+		
+	}
+	
+}
