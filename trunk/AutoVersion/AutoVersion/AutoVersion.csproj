@@ -86,9 +86,15 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Templates\AutoVersion\ActionScript 2.fdt" />
-    <None Include="Templates\AutoVersion\ActionScript 3.fdt" />
-    <None Include="Templates\AutoVersion\haXe.fdt" />
+    <None Include="Templates\AutoVersion\ActionScript 2.fdt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\AutoVersion\ActionScript 3.fdt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\AutoVersion\haXe.fdt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
