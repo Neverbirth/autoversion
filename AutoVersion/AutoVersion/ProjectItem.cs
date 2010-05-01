@@ -112,6 +112,25 @@ namespace AutoVersion
             return retVal;
         }
 
+        private string GetVersionArgRegexLine(string[] templateLines, string versionArg)
+        {
+            string dataLine = templateLines.FirstOrDefault((x) => x.Contains(versionArg));
+
+            if (string.IsNullOrEmpty(dataLine)) return "0";
+
+            string regExedArg = versionArg.Replace("$", "\\$").Replace("(", "\\(").Replace(")", "\\)");
+
+            dataLine = "(?<=" + dataLine.Replace("\\", "\\\\").Replace("'", "\\'").Replace("}", "\\}").
+                Replace(".", "\\.").Replace("+", "\\+").Replace("*", "\\*").Replace("/", "\\/").
+                Replace("?", "\\?").Replace("^", "\\^").Replace("$", "\\$").Replace("|", "\\|").
+                Replace("[", "\\[").Replace("]", "\\]").Replace("(", "\\(").Replace(")", "\\)").
+                Replace("{", "\\{").Replace("#", "\\#").Replace(regExedArg, @")(\d+)(?=") + ")";
+
+            dataLine = Regex.Replace(dataLine, @"\\\$\\\([A-Za-z]+\\\)", @"(?:.+|\r|\r\n)");
+
+            return dataLine;
+        }
+
         public string GetVersionFilename()
         {
             string basePath = Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath);
@@ -137,34 +156,15 @@ namespace AutoVersion
 
         private string GetVersionDataValue(string versionData, string pattern)
         {
-            try
+            if (Regex.IsMatch(versionData, pattern))
             {
                 return
-                    Regex.Matches(versionData, pattern)[0].Groups[1].Captures[0].Value;
+                    Regex.Match(versionData, pattern).Captures[0].Value;
             }
-            catch (Exception ex)
+            else
             {
                 return "0";
             }
-        }
-
-        private string GetVersionDataValueFromTemplate(string versionData, string[] templateLines, string versionArg)
-        {
-            string dataLine = templateLines.FirstOrDefault((x) => x.Contains(versionArg));
-
-            if (string.IsNullOrEmpty(dataLine)) return "0";
-
-            string regExedArg = versionArg.Replace("$", "\\$").Replace("(", "\\(").Replace(")", "\\)");
-
-            dataLine = dataLine.Replace("\\", "\\\\").Replace("'", "\\'").Replace("}", "\\}").
-                Replace(".", "\\.").Replace("+", "\\+").Replace("*", "\\*").Replace("/", "\\/").
-                Replace("?", "\\?").Replace("^", "\\^").Replace("$", "\\$").Replace("|", "\\|").
-                Replace("[", "\\[").Replace("]", "\\]").Replace("(", "\\(").Replace(")", "\\)").
-                Replace("{", "\\{").Replace("#", "\\#").Replace(regExedArg, @"(\d+)");
-
-            dataLine = Regex.Replace(dataLine, @"\\\$\\\([A-Za-z]+\\\)", @"(?:.+|\r|\r\n)");
-
-            return GetVersionDataValue(versionData, dataLine);
         }
 
         public void LoadVersion()
@@ -182,10 +182,10 @@ namespace AutoVersion
 
                 string[] templateLines = File.ReadAllLines(GetTemplateFileName());
 
-                string major = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Major)");
-                string minor = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Minor)");
-                string build = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Build)");
-                string revision = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Revision)");
+                string major = GetVersionDataValue(fileVersionData, GetVersionArgRegexLine(templateLines, "$(Major)"));
+                string minor = GetVersionDataValue(fileVersionData, GetVersionArgRegexLine(templateLines, "$(Minor)"));
+                string build = GetVersionDataValue(fileVersionData, GetVersionArgRegexLine(templateLines, "$(Build)"));
+                string revision = GetVersionDataValue(fileVersionData, GetVersionArgRegexLine(templateLines, "$(Revision)"));
 
                 version = new Version(major + "." + minor + "." + build + "." + revision);
             }
@@ -243,11 +243,16 @@ namespace AutoVersion
 
                 string[] templateLines = File.ReadAllLines(GetTemplateFileName());
 
-                string major = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Major)");
-                string minor = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Minor)");
-                string build = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Build)");
-                string revision = GetVersionDataValueFromTemplate(fileVersionData, templateLines, "$(Revision)");
+                SetVersionDataValue(ref fileVersionData, GetVersionArgRegexLine(templateLines, "$(Major)"), Version.Major);
+                SetVersionDataValue(ref fileVersionData, GetVersionArgRegexLine(templateLines, "$(Minor)"), Version.Minor);
+                SetVersionDataValue(ref fileVersionData, GetVersionArgRegexLine(templateLines, "$(Build)"), Version.Build);
+                SetVersionDataValue(ref fileVersionData, GetVersionArgRegexLine(templateLines, "$(Revision)"), Version.Revision);
             }
+        }
+
+        private void SetVersionDataValue(ref string versionData, string pattern, int newValue)
+        {
+            versionData = Regex.Replace(versionData, pattern, newValue.ToString());
         }
 
         #endregion
