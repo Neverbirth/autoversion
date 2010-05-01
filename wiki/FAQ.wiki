@@ -40,12 +40,13 @@
  * I'd like to use latest SVN revision number for my versioning scheme, could you add support for it?
  Sorry, but this versioning style isn't natively supported. You could try to convert [http://happyturtle.codeplex.com/ Happy Turtle] for AutoVersion. Look at the [FAQ#BVI_Questions BVI Questions section] for more details.
 
- * The class created by AutoVersion doesn't meet the format I use or I'd like.
+ * The class created by AutoVersion doesn't meet the format I use or I'd like, how could I change it?.
  You can create your own template and configure the plugin to use it instead of the default template that comes together with AutoVersion.
  The template syntax uses the same arguments as common FlashDevelop templates, along with $(Major), $(Minor), $(Build) and $(Revision) to print the different version parts.
+ Also, as from AutoVersion 1.0 the templates aren't embedded inside the assembly, so you can head to your user FlashDevelop templates folder, and modify the default templates. However, take into account that they may be overwritten with each new plugin release.
 
  * This is all great, but I don't use FlashDevelop to write AS3 projects, can I still use AutoVersion?
- Yes, although detecting the language used is still unimplemented, you can create your own templates matching your project type, and use them.
+ Yes, since version 1.0 AutoVersion also works for ActionScript 2 and haXe projects, and you can always use the custom template feature in order to further customize your versioning file.
 
  * AutoVersion creates a file named <project name>.version under my project path, what is it?
  That .version file is just a simple XML containing the AutoVersion project settings. It is saved that way so it can be easily shared between team members, and store it in a repository with no problems.
