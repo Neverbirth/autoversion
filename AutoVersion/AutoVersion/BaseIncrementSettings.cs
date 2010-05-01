@@ -34,6 +34,7 @@ namespace AutoVersion
         [Category("Increment Settings")]
         [DisplayName("Smart Update")]
         [Description("Set this option when the version file is prone to be modified and do not want to be overwritten each time. It may affect compilation time somewhat.")]
+        [DefaultValue(false)]
         public bool SmartUpdate { get; set; }
 
         /// <summary>

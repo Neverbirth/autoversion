@@ -94,10 +94,10 @@ namespace AutoVersion
                         fileName = "ActionScript 2.fdt";
                         break;
                     case LanguageType.Haxe:
-                        fileName = "ActionScript 3.fdt";
+                        fileName = "haXe.fdt";
                         break;
                     default:
-                        fileName = "haXe.fdt";
+                        fileName = "ActionScript 3.fdt";
                         break;
                 }
 
@@ -134,8 +134,8 @@ namespace AutoVersion
         public string GetVersionFilename()
         {
             string basePath = Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath);
-            string filename = "Version.as";
-
+            string filename = "Version." + (ProjectType == LanguageType.Haxe ? "hx" : "as");
+            
             if (!string.IsNullOrEmpty(IncrementSettings.VersionFilename))
             {
                 filename = IncrementSettings.VersionFilename;
@@ -230,24 +230,27 @@ namespace AutoVersion
         public void SaveVersion()
         {
             string versionFile = GetVersionFilename();
+            string content;
             Encoding encoding = Encoding.GetEncoding((Int32)PluginCore.PluginBase.Settings.DefaultCodePage);
 
             if (!IncrementSettings.SmartUpdate || !File.Exists(versionFile))
             {
-                FileHelper.WriteFile(versionFile, GetVersionDataContent(Path.GetFileNameWithoutExtension(versionFile)),
-                                     encoding, PluginCore.PluginBase.Settings.SaveUnicodeWithBOM);
+                content = GetVersionDataContent(Path.GetFileNameWithoutExtension(versionFile));
             }
             else
             {
-                string fileVersionData = FileHelper.ReadFile(versionFile);
+                content = FileHelper.ReadFile(versionFile);
 
                 string[] templateLines = File.ReadAllLines(GetTemplateFileName());
 
-                SetVersionDataValue(ref fileVersionData, GetVersionArgRegexLine(templateLines, "$(Major)"), Version.Major);
-                SetVersionDataValue(ref fileVersionData, GetVersionArgRegexLine(templateLines, "$(Minor)"), Version.Minor);
-                SetVersionDataValue(ref fileVersionData, GetVersionArgRegexLine(templateLines, "$(Build)"), Version.Build);
-                SetVersionDataValue(ref fileVersionData, GetVersionArgRegexLine(templateLines, "$(Revision)"), Version.Revision);
+                SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Major)"), Version.Major);
+                SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Minor)"), Version.Minor);
+                SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Build)"), Version.Build);
+                SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Revision)"), Version.Revision);
             }
+
+            FileHelper.WriteFile(versionFile, content,
+                                 encoding, PluginCore.PluginBase.Settings.SaveUnicodeWithBOM);
         }
 
         private void SetVersionDataValue(ref string versionData, string pattern, int newValue)
