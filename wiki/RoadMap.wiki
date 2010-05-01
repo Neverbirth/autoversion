@@ -1,12 +1,13 @@
 #summary List of main features/changes to make for each version.
 #labels Featured,Phase-Requirements
 
- * AutoVersion 1.0:
-  * Detect language used and not only AS3 projects.
-  * Add SmartUpdate setting.
-
  * AutoVersion 1.1:
   * Check for the project classpaths to define which should be the default location to store Version.as.
   * Add setting to update AIR application.xml file.
   * Misc optimizations.
   * Make a simple "multi-incrementor" plugin for the people that have requested for it.
+
+ * AutoVersion 1.2:
+  * Add build events to automatically make fdz.
+  * Remove version package setting and automatically detect it.
+  * Add project name to template versioning args so people could use the same file for different projects?
