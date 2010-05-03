@@ -39,6 +39,7 @@
 
  * I'd like to use latest SVN revision number for my versioning scheme, could you add support for it?
  Sorry, but this versioning style isn't natively supported. You could try to convert [http://happyturtle.codeplex.com/ Happy Turtle] for AutoVersion. Look at the [FAQ#BVI_Questions BVI Questions section] for more details.
+ _*Note:*_ In the downloads section you can find a compiled binary of Happy Turtle with support for AutoVersion, but bear in mind that this version is unofficial and unsupported.
 
  * The class created by AutoVersion doesn't meet the format I use or I'd like, how could I change it?.
  You can create your own template and configure the plugin to use it instead of the default template that comes together with AutoVersion.
