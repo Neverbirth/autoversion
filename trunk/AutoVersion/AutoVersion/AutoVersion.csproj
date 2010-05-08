@@ -66,6 +66,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Qreed\Reflection\EnumHelper.cs" />
     <Compile Include="Qreed\Reflection\ReflectionHelper.cs" />
+    <Compile Include="Utils\IOUtils.cs" />
+    <Compile Include="Utils\ProjectUtils.cs" />
     <Compile Include="VersionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
