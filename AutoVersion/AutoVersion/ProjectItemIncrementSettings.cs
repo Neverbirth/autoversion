@@ -47,24 +47,6 @@ namespace AutoVersion
             }
         }
 
-        private string _versionFilePackage = string.Empty;
-        /// <summary>
-        /// Gets or sets the version file package level.
-        /// </summary>
-        /// <value>The package name.</value>
-        [Category("Increment Settings")]
-        [Description("Use this value if the version is not located at the root of a class path. ")]
-        [DefaultValue("")]
-        [DisplayName("Version File Package")]
-        public string VersionFilePackage
-        {
-            get { return _versionFilePackage; }
-            set
-            {
-                _versionFilePackage = value ?? string.Empty;
-            }
-        }
-
         private string _versionTemplateFilename = string.Empty;
         /// <summary>
         /// Gets or sets the version info filename.
@@ -125,7 +107,6 @@ namespace AutoVersion
 
                 AutoUpdateVersionData = bool.Parse(autoVersionElement.GetAttributeValue("autoUpdateVersionData", "false"));
                 _versionFilename = autoVersionElement.GetAttributeValue("versionFilename", string.Empty);
-                VersionFilePackage = autoVersionElement.GetAttributeValue("versionFilePackage", string.Empty);
                 _versionTemplateFilename = autoVersionElement.GetAttributeValue("versionTemplateFilename", string.Empty);
                 IncrementBeforeBuild = bool.Parse(autoVersionElement.GetAttributeValue("incrementBeforeBuild", "true"));
                 UseGlobalSettings = bool.Parse(autoVersionElement.GetAttributeValue("useGlobalSettings", (GlobalIncrementSettings.GetInstance().Apply == GlobalIncrementSettings.ApplyGlobalSettings.AsDefault).ToString()));
@@ -167,9 +148,6 @@ namespace AutoVersion
 
             if (!string.IsNullOrEmpty(VersionFilename))
                 autoVersionElement.Add(new XAttribute("versionFilename", VersionFilename));
-
-            if (!string.IsNullOrEmpty(VersionFilePackage))
-                autoVersionElement.Add(new XAttribute("versionFilePackage", VersionFilePackage));
 
             if (!string.IsNullOrEmpty(VersionTemplateFilename))
                 autoVersionElement.Add(new XAttribute("versionTemplateFilename", VersionTemplateFilename));

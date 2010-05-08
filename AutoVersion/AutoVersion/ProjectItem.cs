@@ -131,16 +131,22 @@ namespace AutoVersion
 
         public string GetVersionFilename()
         {
-            string basePath = Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath);
-            string filename = "Version." + (ProjectType == LanguageType.Haxe ? "hx" : "as");
+            string filename;
 
             if (!string.IsNullOrEmpty(IncrementSettings.VersionFilename))
             {
                 filename = IncrementSettings.VersionFilename;
                 return PluginCore.PluginBase.CurrentProject.GetAbsolutePath(filename);
             }
+            else
+            {
+                string basePath = PluginCore.PluginBase.CurrentProject.GetAbsolutePath(
+                    Utils.ProjectUtils.GetBaseSourcePath() ?? Path.GetDirectoryName(
+                        PluginCore.PluginBase.CurrentProject.ProjectPath));
+                filename = "Version." + (ProjectType == LanguageType.Haxe ? "hx" : "as");
 
-            return Path.Combine(basePath, filename);
+                return Path.Combine(basePath, filename);
+            }
         }
 
         private string GetVersionDataContent(string fileName)
@@ -201,7 +207,17 @@ namespace AutoVersion
 
             if (content.Contains("$(FileNameWithPackage)") || content.Contains("$(Package)"))
             {
-                string package = IncrementSettings.VersionFilePackage;
+                string package = string.Empty;
+
+                // Find closest parent
+                string classpath = Utils.ProjectUtils.GetClosestPath(fileName);
+
+                if (classpath != null)
+                {
+                    // Parse package name from path
+                    package = Path.GetDirectoryName(Utils.IOUtils.MakeRelativePath(classpath, fileName));
+                    package = package.Replace(Path.DirectorySeparatorChar, '.');
+                }
 
                 content = content.Replace("$(Package)", package);
 
