@@ -43,7 +43,7 @@ namespace AutoVersion
             get { return _versionFilename; }
             set
             {
-                _versionFilename = !string.IsNullOrEmpty(value) ? Utils.IOUtils.MakeRelativePath(PluginBase.CurrentProject.ProjectPath, value) : string.Empty;
+                _versionFilename = !string.IsNullOrEmpty(value) ? PluginBase.CurrentProject.GetRelativePath(value) : string.Empty;
             }
         }
 
@@ -80,7 +80,7 @@ namespace AutoVersion
             get { return _versionTemplateFilename; }
             set
             {
-                _versionTemplateFilename = !string.IsNullOrEmpty(value) ? Utils.IOUtils.MakeRelativePath(PluginBase.CurrentProject.ProjectPath, value) : string.Empty;
+                _versionTemplateFilename = !string.IsNullOrEmpty(value) ? PluginBase.CurrentProject.GetRelativePath(value) : string.Empty;
             }
         }
 
@@ -124,9 +124,9 @@ namespace AutoVersion
                 XElement autoVersionElement = projectVersionDocument.Element("autoVersion");
 
                 AutoUpdateVersionData = bool.Parse(autoVersionElement.GetAttributeValue("autoUpdateVersionData", "false"));
-                VersionFilename = autoVersionElement.GetAttributeValue("versionFilename", string.Empty);
+                _versionFilename = autoVersionElement.GetAttributeValue("versionFilename", string.Empty);
                 VersionFilePackage = autoVersionElement.GetAttributeValue("versionFilePackage", string.Empty);
-                VersionTemplateFilename = autoVersionElement.GetAttributeValue("versionTemplateFilename", string.Empty);
+                _versionTemplateFilename = autoVersionElement.GetAttributeValue("versionTemplateFilename", string.Empty);
                 IncrementBeforeBuild = bool.Parse(autoVersionElement.GetAttributeValue("incrementBeforeBuild", "true"));
                 UseGlobalSettings = bool.Parse(autoVersionElement.GetAttributeValue("useGlobalSettings", (GlobalIncrementSettings.GetInstance().Apply == GlobalIncrementSettings.ApplyGlobalSettings.AsDefault).ToString()));
 

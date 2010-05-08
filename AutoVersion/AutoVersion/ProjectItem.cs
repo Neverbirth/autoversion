@@ -1,7 +1,6 @@
 ﻿using PluginCore.Helpers;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -80,13 +79,13 @@ namespace AutoVersion
 
         private string GetTemplateFileName()
         {
-            string basePath, retVal;
+            string retVal;
 
             if (string.IsNullOrEmpty(IncrementSettings.VersionTemplateFilename))
             {
                 string fileName;
 
-                basePath = Path.Combine(PathHelper.TemplateDir, "AutoVersion");
+                string basePath = Path.Combine(PathHelper.TemplateDir, "AutoVersion");
 
                 switch (ProjectType)
                 {
@@ -105,8 +104,7 @@ namespace AutoVersion
             }
             else
             {
-                basePath = Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath);
-                retVal = Utils.IOUtils.MakeAbsolutePath(basePath + Path.DirectorySeparatorChar, IncrementSettings.VersionTemplateFilename);
+                retVal = PluginCore.PluginBase.CurrentProject.GetAbsolutePath(IncrementSettings.VersionTemplateFilename);
             }
 
             return retVal;
@@ -114,7 +112,7 @@ namespace AutoVersion
 
         private string GetVersionArgRegexLine(string[] templateLines, string versionArg)
         {
-            string dataLine = templateLines.FirstOrDefault((x) => x.Contains(versionArg));
+            string dataLine = templateLines.FirstOrDefault(x => x.Contains(versionArg));
 
             if (string.IsNullOrEmpty(dataLine)) return "0";
 
@@ -135,11 +133,11 @@ namespace AutoVersion
         {
             string basePath = Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath);
             string filename = "Version." + (ProjectType == LanguageType.Haxe ? "hx" : "as");
-            
+
             if (!string.IsNullOrEmpty(IncrementSettings.VersionFilename))
             {
                 filename = IncrementSettings.VersionFilename;
-                return Utils.IOUtils.MakeAbsolutePath(basePath + Path.DirectorySeparatorChar, filename);
+                return PluginCore.PluginBase.CurrentProject.GetAbsolutePath(filename);
             }
 
             return Path.Combine(basePath, filename);
