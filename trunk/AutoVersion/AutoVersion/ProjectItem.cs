@@ -197,8 +197,10 @@ namespace AutoVersion
             this.Version = version;
         }
 
-        private string ParseTemplateData(string content, string fileName)
+        private string ParseTemplateData(string content, string path)
         {
+            string fileName = Path.GetFileNameWithoutExtension(path);
+
             // Process common args
             content = PluginCore.PluginBase.MainForm.ProcessArgString(content);
 
@@ -208,14 +210,14 @@ namespace AutoVersion
             if (content.Contains("$(FileNameWithPackage)") || content.Contains("$(Package)"))
             {
                 string package = string.Empty;
-
+                
                 // Find closest parent
-                string classpath = Utils.ProjectUtils.GetClosestPath(fileName);
+                string classpath = Utils.ProjectUtils.GetClosestPath(path);
 
                 if (classpath != null)
                 {
                     // Parse package name from path
-                    package = Path.GetDirectoryName(Utils.IOUtils.MakeRelativePath(classpath, fileName));
+                    package = Path.GetDirectoryName(Utils.IOUtils.MakeRelativePath(classpath + Path.DirectorySeparatorChar, path));
                     package = package.Replace(Path.DirectorySeparatorChar, '.');
                 }
 
@@ -249,7 +251,7 @@ namespace AutoVersion
 
             if (!IncrementSettings.SmartUpdate || !File.Exists(versionFile))
             {
-                content = GetVersionDataContent(Path.GetFileNameWithoutExtension(versionFile));
+                content = GetVersionDataContent(versionFile);
             }
             else
             {

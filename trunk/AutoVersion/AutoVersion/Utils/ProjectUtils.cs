@@ -14,8 +14,8 @@ namespace AutoVersion.Utils
         public static string GetClosestPath(string basePath)
         {
             string closest = GetClosestPath(basePath, PluginBase.CurrentProject.SourcePaths, false);
-
-            if (closest == string.Empty)
+            
+            if (closest == null)
             {
                 IPlugin projectManager = PluginBase.MainForm.FindPlugin("30018864-fadd-1122-b2a5-779832cbbf23");
 
@@ -25,17 +25,17 @@ namespace AutoVersion.Utils
                                                                                       BindingFlags.Public |
                                                                                       BindingFlags.Instance |
                                                                                       BindingFlags.ExactBinding);
-
-                    closest = GetClosestPath(basePath, (List<string>)prop.GetValue(projectManager, null), true);
+                    
+                    closest = GetClosestPath(basePath, (List<string>)prop.GetValue(projectManager.Settings, null), true);
                 }
             }
 
-            return (closest.Length > 0) ? closest : null;
+            return closest;
         }
 
         private static string GetClosestPath(string basePath, IEnumerable<string> pathCollection, bool absolutePaths)
         {
-            string closest = string.Empty;
+            string closest = null;
             string absolutePath;
             foreach (string classpath in pathCollection)
             {
@@ -43,7 +43,7 @@ namespace AutoVersion.Utils
                 if ((basePath.StartsWith(absolutePath) || absolutePath == ".") && absolutePath.Length > closest.Length)
                     closest = absolutePath;
             }
-
+            
             return closest;
         }
 
