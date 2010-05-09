@@ -128,6 +128,10 @@ namespace AutoVersion
 
                     _projectItem.SaveVersion();
 
+                    if (_projectItem.IncrementSettings.UpdateAirVersion && _projectItem.IsAirProjector())
+                    {
+                        _projectItem.UpdateAirVersion();
+                    }
                 }
             }
         }

@@ -66,6 +66,13 @@ namespace AutoVersion
             set { this._versioningStyle = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the build action
+        /// </summary>
+        /// <value>The build action on which the auto update should occur.</value>
+        [Category("Condition"), DefaultValue(BuildActionType.Both), DisplayName("Build Action"), Description("Set this to the desired build action when the auto update should occur.")]
+        public BuildActionType BuildAction { get; set; }
+
         private bool _incrementBeforeBuild = true;
         /// <summary>
         /// Gets or set if the increment should happen before or after the current build.
@@ -83,11 +90,14 @@ namespace AutoVersion
         }
 
         /// <summary>
-        /// Gets or sets the build action
+        /// Gets or sets if AutoVersion should update the version information of AIR applications.
         /// </summary>
-        /// <value>The build action on which the auto update should occur.</value>
-        [Category("Condition"), DefaultValue(BuildActionType.Both), DisplayName("Build Action"), Description("Set this to the desired build action when the auto update should occur.")]
-        public BuildActionType BuildAction { get; set; }
+        /// <value><c>true</c> to enable the actions, <c>false</c> to manually update the app information.</value>
+        [Category("Condition")]
+        [DefaultValue(false)]
+        [DisplayName("Update AIR Apps Version Info")]
+        [Description("Enable this option if you want AutoVersion to update AIR application descriptor files.")]
+        public bool UpdateAirVersion { get; set; }
 
         #endregion
 
@@ -106,6 +116,7 @@ namespace AutoVersion
             SmartUpdate = source.SmartUpdate;
             IsUniversalTime = source.IsUniversalTime;
             IncrementBeforeBuild = source.IncrementBeforeBuild;
+            UpdateAirVersion = source.UpdateAirVersion;
         }
 
         /// <summary>

@@ -125,7 +125,7 @@ namespace AutoVersion
                 VersioningStyle.FromGlobalVariable(versioningStyle);
                 StartDate = DateTime.Parse(autoVersionElement.GetAttributeValue("startDate", "10/21/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
                 SmartUpdate = bool.Parse(autoVersionElement.GetAttributeValue("smartUpdate", "false"));
-
+                UpdateAirVersion = bool.Parse(autoVersionElement.GetAttributeValue("updateAirVersion", "false"));
             }
             catch (Exception ex)
             {
@@ -159,6 +159,7 @@ namespace AutoVersion
             autoVersionElement.Add(new XAttribute("incrementBeforeBuild", IncrementBeforeBuild.ToString()));
             autoVersionElement.Add(new XAttribute("smartUpdate", SmartUpdate.ToString()));
             autoVersionElement.Add(new XAttribute("useGlobalSettings", UseGlobalSettings.ToString()));
+            autoVersionElement.Add(new XAttribute("updateAirVersion", UpdateAirVersion.ToString()));
 
             projectVersionDocument.Add(autoVersionElement);
 
