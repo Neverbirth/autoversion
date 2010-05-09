@@ -2,7 +2,6 @@
 #labels Featured,Phase-Requirements
 
  * AutoVersion 1.1:
-  * Add setting to update AIR application.xml file.
   * Misc optimizations.
 
  * Break:
