@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace AutoVersion
 {
@@ -171,6 +172,28 @@ namespace AutoVersion
             }
         }
 
+        public bool IsAirProjector()
+        {
+            if (this.ProjectType == LanguageType.ActionScript2 || this.ProjectType == LanguageType.None)
+                return false;
+
+            XDocument projectDoc = XDocument.Load(PluginCore.PluginBase.CurrentProject.ProjectPath);
+
+            if (this.ProjectType == LanguageType.ActionScript3)
+            {
+                return
+                    (projectDoc.Element("project").Element("build").Elements("option").FirstOrDefault(
+                        x => x.Attribute("additional") != null &&
+                            x.Attribute("additional").Value.Split('\n').Contains("+configname=air")) != null);
+            }
+            else
+            {
+                return
+                    (projectDoc.Element("project").Element("haxelib").Elements("library").FirstOrDefault(x => x.Attribute("name").Value == "air") !=
+                    null);
+            }
+        }
+
         public void LoadVersion()
         {
             Version version;
@@ -210,11 +233,11 @@ namespace AutoVersion
             if (content.Contains("$(FileNameWithPackage)") || content.Contains("$(Package)"))
             {
                 string package = string.Empty;
-                
+
                 // Find closest parent
                 string classpath = Utils.ProjectUtils.GetClosestPath(path);
 
-                if (classpath != null)
+                if (classpath != string.Empty)
                 {
                     // Parse package name from path
                     package = Path.GetDirectoryName(Utils.IOUtils.MakeRelativePath(classpath + Path.DirectorySeparatorChar, path));
@@ -272,6 +295,31 @@ namespace AutoVersion
         private void SetVersionDataValue(ref string versionData, string pattern, int newValue)
         {
             versionData = Regex.Replace(versionData, pattern, newValue.ToString());
+        }
+
+        public void UpdateAirVersion()
+        {
+            string airPropertiesDescriptor = Path.Combine(Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath), "application.xml");
+
+            if (!File.Exists(airPropertiesDescriptor)) return;
+
+            XNamespace airNs = "http://ns.adobe.com/air/application/1.5";
+
+            XDocument airPropertiesDoc = XDocument.Load(airPropertiesDescriptor);
+
+            XElement versionElement = airPropertiesDoc.Element(airNs + "application").Element(airNs + "version");
+
+            if (versionElement != null)
+            {
+                versionElement.SetValue(this.Version.ToString());
+            }
+            else
+            {
+                versionElement = new XElement(airNs + "version", this.Version.ToString());
+                airPropertiesDoc.Element(airNs + "application").Add(versionElement);
+            }
+
+            airPropertiesDoc.Save(airPropertiesDescriptor);
         }
 
         #endregion

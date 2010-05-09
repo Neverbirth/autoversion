@@ -15,7 +15,7 @@ namespace AutoVersion.Utils
         {
             string closest = GetClosestPath(basePath, PluginBase.CurrentProject.SourcePaths, false);
             
-            if (closest == null)
+            if (closest == string.Empty)
             {
                 IPlugin projectManager = PluginBase.MainForm.FindPlugin("30018864-fadd-1122-b2a5-779832cbbf23");
 
@@ -35,7 +35,7 @@ namespace AutoVersion.Utils
 
         private static string GetClosestPath(string basePath, IEnumerable<string> pathCollection, bool absolutePaths)
         {
-            string closest = null;
+            string closest = string.Empty;
             string absolutePath;
             foreach (string classpath in pathCollection)
             {
@@ -60,7 +60,7 @@ namespace AutoVersion.Utils
                 }
             }
 
-            if (retVal == string.Empty && PluginBase.CurrentProject.SourcePaths.Length > 0)
+            if (retVal == null && PluginBase.CurrentProject.SourcePaths.Length > 0)
             {
                 retVal = PluginBase.CurrentProject.SourcePaths[0];
             }

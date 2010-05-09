@@ -105,6 +105,7 @@ namespace AutoVersion
                 Apply = (ApplyGlobalSettings)Enum.Parse(typeof(ApplyGlobalSettings), autoVersionElement.GetAttributeValue("apply", "OnlyWhenChosen"));
                 AutoUpdateVersionData = bool.Parse(autoVersionElement.GetAttributeValue("autoUpdateVersionData", "false"));
                 IncrementBeforeBuild = bool.Parse(autoVersionElement.GetAttributeValue("incrementBeforeBuild", "true"));
+                UpdateAirVersion = bool.Parse(autoVersionElement.GetAttributeValue("updateAirVersion", "false"));
 
                 try
                 {
@@ -145,6 +146,7 @@ namespace AutoVersion
             autoVersionElement.Add(new XAttribute("startDate", StartDate.ToString(System.Globalization.CultureInfo.InvariantCulture)));
             autoVersionElement.Add(new XAttribute("incrementBeforeBuild", IncrementBeforeBuild.ToString()));
             autoVersionElement.Add(new XAttribute("smartUpdate", SmartUpdate.ToString()));
+            autoVersionElement.Add(new XAttribute("updateAirVersion", UpdateAirVersion.ToString()));
 
             projectVersionDocument.Add(autoVersionElement);
 
