@@ -1,4 +1,5 @@
-﻿using PluginCore.Helpers;
+﻿using System.Collections.Generic;
+using PluginCore.Helpers;
 
 using System;
 using System.IO;
@@ -111,7 +112,7 @@ namespace AutoVersion
             return retVal;
         }
 
-        private string GetVersionArgRegexLine(string[] templateLines, string versionArg)
+        private string GetVersionArgRegexLine(IEnumerable<string> templateLines, string versionArg)
         {
             string dataLine = templateLines.FirstOrDefault(x => x.Contains(versionArg));
 
@@ -166,10 +167,8 @@ namespace AutoVersion
                 return
                     Regex.Match(versionData, pattern).Captures[0].Value;
             }
-            else
-            {
-                return "0";
-            }
+            
+            return "0";
         }
 
         public bool IsAirProjector()
@@ -186,12 +185,10 @@ namespace AutoVersion
                         x => x.Attribute("additional") != null &&
                             x.Attribute("additional").Value.Split('\n').Contains("+configname=air")) != null);
             }
-            else
-            {
-                return
-                    (projectDoc.Element("project").Element("haxelib").Elements("library").FirstOrDefault(x => x.Attribute("name").Value == "air") !=
-                    null);
-            }
+            
+            return
+                (projectDoc.Element("project").Element("haxelib").Elements("library").FirstOrDefault(x => x.Attribute("name").Value == "air") !=
+                 null);
         }
 
         public void LoadVersion()
@@ -207,7 +204,7 @@ namespace AutoVersion
             {
                 string fileVersionData = FileHelper.ReadFile(versionFile);
 
-                string[] templateLines = File.ReadAllLines(GetTemplateFileName());
+                IEnumerable<string> templateLines = File.ReadAllLines(GetTemplateFileName()).Where(x => x.Contains("$(Major)") || x.Contains("$(Minor)") || x.Contains("$(Build)") || x.Contains("$(Revision)"));
 
                 string major = GetVersionDataValue(fileVersionData, GetVersionArgRegexLine(templateLines, "$(Major)"));
                 string minor = GetVersionDataValue(fileVersionData, GetVersionArgRegexLine(templateLines, "$(Minor)"));
@@ -280,7 +277,7 @@ namespace AutoVersion
             {
                 content = FileHelper.ReadFile(versionFile);
 
-                string[] templateLines = File.ReadAllLines(GetTemplateFileName());
+                IEnumerable<string> templateLines = File.ReadAllLines(GetTemplateFileName()).Where(x => x.Contains("$(Major)") || x.Contains("$(Minor)") || x.Contains("$(Build)") || x.Contains("$(Revision)"));
 
                 SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Major)"), Version.Major);
                 SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Minor)"), Version.Minor);
@@ -299,7 +296,12 @@ namespace AutoVersion
 
         public void UpdateAirVersion()
         {
-            string airPropertiesDescriptor = Path.Combine(Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath), "application.xml");
+            string airPropertiesDescriptor;
+
+            if (IncrementSettings.AirDescriptorFile == string.Empty)
+                airPropertiesDescriptor = Path.Combine(Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath), "application.xml");
+            else
+                airPropertiesDescriptor = PluginCore.PluginBase.CurrentProject.GetAbsolutePath(IncrementSettings.AirDescriptorFile);
 
             if (!File.Exists(airPropertiesDescriptor)) return;
 
