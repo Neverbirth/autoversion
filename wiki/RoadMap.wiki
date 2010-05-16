@@ -2,7 +2,6 @@
 #labels Featured,Phase-Requirements
 
  * AutoVersion 1.1:
-  * Add property to set AIR descriptor file path.
   * Misc optimizations.
 
  * Break:
