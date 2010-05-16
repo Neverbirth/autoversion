@@ -66,6 +66,25 @@ namespace AutoVersion
             }
         }
 
+        private string _airDescriptorFilename = string.Empty;
+        /// <summary>
+        /// Gets or sets the AIR descriptor filename.
+        /// </summary>
+        /// <value>The full path to the AIR descriptor filename.</value>
+        [Category("Inrement Settings")]
+        [DefaultValue("")]
+        [DisplayName("AIR Descriptor File")]
+        [Description("Change this setting if your application descriptor file is not the default application.xml.")]
+        [EditorAttribute(typeof(FileNameEditor), typeof(UITypeEditor))]
+        public string AirDescriptorFile
+        {
+            get { return _airDescriptorFilename; }
+            set
+            {
+                _airDescriptorFilename = !string.IsNullOrEmpty(value) ? PluginBase.CurrentProject.GetRelativePath(value) : string.Empty;
+            }
+        }
+
         /// <summary>
         /// Gets or sets if this project should use the global settings instead of it's own.
         /// </summary>
@@ -108,6 +127,7 @@ namespace AutoVersion
                 AutoUpdateVersionData = bool.Parse(autoVersionElement.GetAttributeValue("autoUpdateVersionData", "false"));
                 _versionFilename = autoVersionElement.GetAttributeValue("versionFilename", string.Empty);
                 _versionTemplateFilename = autoVersionElement.GetAttributeValue("versionTemplateFilename", string.Empty);
+                _airDescriptorFilename = autoVersionElement.GetAttributeValue("airDescriptorFile", string.Empty);
                 IncrementBeforeBuild = bool.Parse(autoVersionElement.GetAttributeValue("incrementBeforeBuild", "true"));
                 UseGlobalSettings = bool.Parse(autoVersionElement.GetAttributeValue("useGlobalSettings", (GlobalIncrementSettings.GetInstance().Apply == GlobalIncrementSettings.ApplyGlobalSettings.AsDefault).ToString()));
 
@@ -151,6 +171,9 @@ namespace AutoVersion
 
             if (!string.IsNullOrEmpty(VersionTemplateFilename))
                 autoVersionElement.Add(new XAttribute("versionTemplateFilename", VersionTemplateFilename));
+
+            if (!string.IsNullOrEmpty(AirDescriptorFile))
+                autoVersionElement.Add(new XAttribute("airDescriptorFile", AirDescriptorFile ));
 
             if (BuildAction != BuildActionType.Both)
                 autoVersionElement.Add(new XAttribute("buildAction", BuildAction.ToString()));
