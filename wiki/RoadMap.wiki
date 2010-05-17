@@ -11,3 +11,6 @@
   * Add reference to ProjectManager.dll and use it instead of reflection.
   * Add build events to automatically make fdz.
   * Add project name to template versioning args so people could use the same file for different projects?
+
+ * AutoVersion 1.3:
+  * Convert string to localizable resources.
