@@ -1,0 +1,16 @@
+package $(Package) $(CSLB){
+	
+	/**
+	$(CBI)* ...
+	$(CBI)* @author $(DefaultUser)
+	$(CBI)*/
+	public final class $(FileName) $(CSLB){
+		
+		static public const Major:int = $(Major);
+		static public const Minor:int = $(Minor);
+		static public const Build:int = $(Build);
+		static public const Revision:int = $(Revision);
+		
+	}
+	
+}

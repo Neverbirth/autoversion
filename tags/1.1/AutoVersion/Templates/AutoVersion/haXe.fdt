@@ -1,0 +1,15 @@
+/**
+$(CBI)* ...
+$(CBI)* @author $(DefaultUser)
+$(CBI)*/
+
+package $(Package);
+
+class $(FileName) $(CSLB){
+
+	static public inline Major:Int = $(Major);
+	static public inline Minor:Int = $(Minor);
+	static public inline Build:Int = $(Build);
+	static public inline Revision:Int = $(Revision);
+   
+}
