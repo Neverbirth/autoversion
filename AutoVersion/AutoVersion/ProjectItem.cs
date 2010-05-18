@@ -112,23 +112,18 @@ namespace AutoVersion
             return retVal;
         }
 
-        private string GetVersionArgRegexLine(IEnumerable<string> templateLines, string versionArg)
+        private static string GetVersionArgRegexLine(IEnumerable<string> templateLines, string versionArg)
         {
             string dataLine = templateLines.FirstOrDefault(x => x.Contains(versionArg));
 
             if (string.IsNullOrEmpty(dataLine)) return "0";
 
-            string regExedArg = versionArg.Replace("$", "\\$").Replace("(", "\\(").Replace(")", "\\)");
+            return LineToRegExPattern(dataLine, versionArg);
+        }
 
-            dataLine = "(?<=" + dataLine.Replace("\\", "\\\\").Replace("'", "\\'").Replace("}", "\\}").
-                Replace(".", "\\.").Replace("+", "\\+").Replace("*", "\\*").Replace("/", "\\/").
-                Replace("?", "\\?").Replace("^", "\\^").Replace("$", "\\$").Replace("|", "\\|").
-                Replace("[", "\\[").Replace("]", "\\]").Replace("(", "\\(").Replace(")", "\\)").
-                Replace("{", "\\{").Replace("#", "\\#").Replace(regExedArg, @")(\d+)(?=") + ")";
-
-            dataLine = Regex.Replace(dataLine, @"\\\$\\\([A-Za-z]+\\\)", @"(?:.+|\r|\r\n)");
-
-            return dataLine;
+        private static IEnumerable<string> GetVersionArgRegexLines(IEnumerable<string> templateLines, string versionArg)
+        {
+            return templateLines.Where(x => x.Contains(versionArg)).Select(x => LineToRegExPattern(x, versionArg));
         }
 
         public string GetVersionFilename()
@@ -160,7 +155,7 @@ namespace AutoVersion
             return templateData;
         }
 
-        private string GetVersionDataValue(string versionData, string pattern)
+        private static string GetVersionDataValue(string versionData, string pattern)
         {
             if (Regex.IsMatch(versionData, pattern))
             {
@@ -189,6 +184,21 @@ namespace AutoVersion
             return
                 (projectDoc.Element("project").Element("haxelib").Elements("library").FirstOrDefault(x => x.Attribute("name").Value == "air") !=
                  null);
+        }
+
+        private static string LineToRegExPattern(string line, string arg)
+        {
+            string regExedArg = arg.Replace("$", "\\$").Replace("(", "\\(").Replace(")", "\\)");
+
+            line = "(?<=" + line.Replace("\\", "\\\\").Replace("'", "\\'").Replace("}", "\\}").
+                Replace(".", "\\.").Replace("+", "\\+").Replace("*", "\\*").Replace("/", "\\/").
+                Replace("?", "\\?").Replace("^", "\\^").Replace("$", "\\$").Replace("|", "\\|").
+                Replace("[", "\\[").Replace("]", "\\]").Replace("(", "\\(").Replace(")", "\\)").
+                Replace("{", "\\{").Replace("#", "\\#").Replace(regExedArg, @")(\d+)(?=") + ")";
+
+            line = Regex.Replace(line, @"\\\$\\\([A-Za-z]+\\\)", @"(?:.+|\r|\r\n)");
+
+            return line;
         }
 
         public void LoadVersion()
@@ -279,19 +289,20 @@ namespace AutoVersion
 
                 IEnumerable<string> templateLines = File.ReadAllLines(GetTemplateFileName()).Where(x => x.Contains("$(Major)") || x.Contains("$(Minor)") || x.Contains("$(Build)") || x.Contains("$(Revision)"));
 
-                SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Major)"), Version.Major);
-                SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Minor)"), Version.Minor);
-                SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Build)"), Version.Build);
-                SetVersionDataValue(ref content, GetVersionArgRegexLine(templateLines, "$(Revision)"), Version.Revision);
+                SetVersionDataValue(ref content, GetVersionArgRegexLines(templateLines, "$(Major)"), Version.Major);
+                SetVersionDataValue(ref content, GetVersionArgRegexLines(templateLines, "$(Minor)"), Version.Minor);
+                SetVersionDataValue(ref content, GetVersionArgRegexLines(templateLines, "$(Build)"), Version.Build);
+                SetVersionDataValue(ref content, GetVersionArgRegexLines(templateLines, "$(Revision)"), Version.Revision);
             }
 
             FileHelper.WriteFile(versionFile, content,
                                  encoding, PluginCore.PluginBase.Settings.SaveUnicodeWithBOM);
         }
 
-        private void SetVersionDataValue(ref string versionData, string pattern, int newValue)
+        private static void SetVersionDataValue(ref string versionData, IEnumerable<string> patterns, int newValue)
         {
-            versionData = Regex.Replace(versionData, pattern, newValue.ToString());
+            foreach (string pattern in patterns)
+                versionData = Regex.Replace(versionData, pattern, newValue.ToString());
         }
 
         public void UpdateAirVersion()
