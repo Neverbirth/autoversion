@@ -71,7 +71,7 @@ namespace AutoVersion
         /// Gets or sets the AIR descriptor filename.
         /// </summary>
         /// <value>The full path to the AIR descriptor filename.</value>
-        [Category("Inrement Settings")]
+        [Category("Increment Settings")]
         [DefaultValue("")]
         [DisplayName("AIR Descriptor File")]
         [Description("Change this setting if your application descriptor file is not the default application.xml.")]
