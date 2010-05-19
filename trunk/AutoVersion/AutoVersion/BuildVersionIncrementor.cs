@@ -93,7 +93,7 @@ namespace AutoVersion
             {
                 _projectItem = new ProjectItem();
 
-                if (_projectItem.IncrementSettings.UseGlobalSettings)
+                if (GlobalIncrementSettings.GetInstance().Apply == GlobalIncrementSettings.ApplyGlobalSettings.Always || _projectItem.IncrementSettings.UseGlobalSettings)
                     _projectItem.ApplyGlobalSettings();
 
                 UpdateProject();
