@@ -10,5 +10,6 @@
   * Add project name to template versioning args so people could use the same file for different projects?
 
  * AutoVersion 1.3:
-  * Convert string to localizable resources.
+  * Convert strings to localizable resources.
   * Add update checker.
+  * Modify code to target .Net framework 2.0.
