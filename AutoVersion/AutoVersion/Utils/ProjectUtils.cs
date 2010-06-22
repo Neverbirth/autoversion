@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace AutoVersion.Utils
@@ -17,17 +16,7 @@ namespace AutoVersion.Utils
             
             if (closest == string.Empty)
             {
-                IPlugin projectManager = PluginBase.MainForm.FindPlugin("30018864-fadd-1122-b2a5-779832cbbf23");
-
-                if (projectManager != null)
-                {
-                    PropertyInfo prop = projectManager.Settings.GetType().GetProperty("GlobalClasspaths",
-                                                                                      BindingFlags.Public |
-                                                                                      BindingFlags.Instance |
-                                                                                      BindingFlags.ExactBinding);
-                    
-                    closest = GetClosestPath(basePath, (List<string>)prop.GetValue(projectManager.Settings, null), true);
-                }
+                closest = GetClosestPath(basePath, ProjectManager.PluginMain.Settings.GlobalClasspaths, true);
             }
 
             return closest;
