@@ -96,8 +96,7 @@ namespace AutoVersion
             _incrementor = new BuildVersionIncrementor(this);
             _incrementor.InitializeIncrementors();
 
-            PluginCore.Managers.EventManager.AddEventHandler(this, EventType.Command);
-            CreateMenuItem();
+            PluginCore.Managers.EventManager.AddEventHandler(this, EventType.Command | EventType.UIStarted);
         }
 
         #endregion
@@ -106,26 +105,34 @@ namespace AutoVersion
 
         public void HandleEvent(object sender, NotifyEvent e, HandlingPriority priority)
         {
-            switch (((DataEvent)e).Action)
+            if (e.Type == EventType.UIStarted)
             {
-                case "ProjectManager.BuildComplete":
-                    _incrementor.OnBuildComplete();
-                    break;
-
-                case "ProjectManager.BuildingProject":
-                    _incrementor.OnBuilding(BuildAction.Building);
-                    break;
-
-                case "ProjectManager.Project":
-                    _incrementor.OnProject();
-
-                    _versionMenuItem.Enabled = (PluginBase.CurrentProject != null);
-                    break;
-
-                case "ProjectManager.TestingProject":
-                    _incrementor.OnBuilding(BuildAction.Testing);
-                    break;
+                CreateMenuItem();
             }
+            else
+            {
+                switch (((DataEvent)e).Action)
+                {
+                    case ProjectManager.ProjectManagerEvents.BuildComplete:
+                        _incrementor.OnBuildComplete();
+                        break;
+
+                    case ProjectManager.ProjectManagerEvents.BuildProject:
+                        _incrementor.OnBuilding(BuildAction.Building);
+                        break;
+
+                    case ProjectManager.ProjectManagerEvents.Project:
+                        _incrementor.OnProject();
+
+                        if (_versionMenuItem != null) _versionMenuItem.Enabled = (PluginBase.CurrentProject != null);
+                        break;
+
+                    case ProjectManager.ProjectManagerEvents.TestProject:
+                        _incrementor.OnBuilding(BuildAction.Testing);
+                        break;
+                }
+            }
+
         }
 
         #endregion
@@ -134,18 +141,24 @@ namespace AutoVersion
 
         private void CreateMenuItem()
         {
-            ToolStripMenuItem toolsMenu = (ToolStripMenuItem)PluginBase.MainForm.FindMenuItem("ToolsMenu");
+            ToolStripMenuItem projectMenu = null;
+            ToolStripItemCollection items = PluginBase.MainForm.MenuStrip.Items;
 
-            if (toolsMenu != null)
+            for (int i = 0, itemCount = items.Count; i < itemCount; i++)
+            {
+               if (items[i] is ProjectManager.Controls.ProjectMenu)
+               {
+                   projectMenu = (ToolStripMenuItem)items[i];
+                   break;
+               }
+            }
+
+            if (projectMenu != null)
             {
                 _versionMenuItem = new ToolStripMenuItem("Version...", null, ToolStripItemAutoVersion_Click);
                 _versionMenuItem.Enabled = false;
 
-                toolsMenu.DropDownItems.Insert(0, _versionMenuItem);
-                toolsMenu.DropDownItems.Insert(1, new ToolStripSeparator());
-                // Comment two previous lines, and uncomment these two ones if you are using ExportProject plugin.
-//                toolsMenu.DropDownItems.Add(new ToolStripSeparator());
-//                toolsMenu.DropDownItems.Add(_versionMenuItem);
+                projectMenu.DropDownItems.Add(_versionMenuItem);
             }
         }
 
