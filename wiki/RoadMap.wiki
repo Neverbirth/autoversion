@@ -5,11 +5,9 @@
   * Make a simple "multi-incrementor" plugin for the people that have requested for it.
 
  * AutoVersion 1.2:
-  * Add reference to ProjectManager.dll and use it instead of reflection.
   * Add build events to automatically make fdz.
-  * Add project name to template versioning args so people could use the same file for different projects?
+  * Convert strings to localizable resources.
 
  * AutoVersion 1.3:
-  * Convert strings to localizable resources.
+  * Add project name to template versioning args so people could use the same file for different projects?
   * Add update checker.
-  * Modify code to target .Net framework 2.0.
