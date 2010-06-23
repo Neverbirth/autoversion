@@ -208,7 +208,8 @@ namespace AutoVersion
             {
                 using (XmlTextReader projectVersionDocument = new XmlTextReader(_versionFile))
                 {
-                    projectVersionDocument.MoveToContent();
+                    if (System.IO.File.Exists(_versionFile))
+                        projectVersionDocument.MoveToContent();
 
                     AutoUpdateVersionData = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "autoUpdateVersionData", "false"));
                     _versionFilename = XmlUtils.GetAttributeValue(projectVersionDocument, "versionFilename", string.Empty);

@@ -169,8 +169,8 @@ namespace AutoVersion
             {
                 using (XmlTextReader projectVersionDocument = new XmlTextReader(_globalSettingsFile))
                 {
-
-                    projectVersionDocument.MoveToContent();
+                    if (System.IO.File.Exists(_globalSettingsFile))
+                        projectVersionDocument.MoveToContent();
 
                     Apply = (ApplyGlobalSettings)Enum.Parse(typeof(ApplyGlobalSettings),
                                    XmlUtils.GetAttributeValue(projectVersionDocument, "apply", "OnlyWhenChosen"));
