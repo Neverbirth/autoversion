@@ -1,4 +1,7 @@
-﻿using PluginCore;
+﻿using AutoVersion.Resources;
+
+using PluginCore;
+using PluginCore.Localization;
 
 using System;
 using System.Collections.Generic;
@@ -16,18 +19,19 @@ namespace AutoVersion
         private const string pluginName = "AutoVersion";
         private const string pluginGuid = "99C549A9-34B0-4ca6-9705-1D2DAB423C4B";
         private const string pluginHelp = "www.flashdevelop.org/community/";
-        private const string pluginDesc = "Adds versioning capabilities to FlashDevelop.";
         private const string pluginAuth = "Héctor";
 
         #endregion
 
         #region  Fields
 
+        private string pluginDesc = "Adds versioning capabilities to FlashDevelop.";
+
         private BuildVersionIncrementor _incrementor;
         private ToolStripMenuItem _versionMenuItem;
 
         #endregion
-
+        
         #region  Properties
 
         public string Author
@@ -94,8 +98,10 @@ namespace AutoVersion
         {
             _incrementor = new BuildVersionIncrementor(this);
             _incrementor.InitializeIncrementors();
-
+            
             PluginCore.Managers.EventManager.AddEventHandler(this, EventType.Command | EventType.UIStarted);
+
+            InitLocalization();
         }
 
         #endregion
@@ -154,11 +160,33 @@ namespace AutoVersion
 
             if (projectMenu != null)
             {
-                _versionMenuItem = new ToolStripMenuItem("Version...", null, ToolStripItemAutoVersion_Click);
+                _versionMenuItem = new ToolStripMenuItem(LocaleHelper.GetString("Label.ProjectMenuItem"), null, ToolStripItemAutoVersion_Click);
                 _versionMenuItem.Enabled = false;
 
                 projectMenu.DropDownItems.Add(_versionMenuItem);
             }
+        }
+
+        /// <summary>
+        /// Initializes the localization of the plugin
+        /// </summary>
+        public void InitLocalization()
+        {
+            LocaleVersion locale = PluginBase.MainForm.Settings.LocaleVersion;
+            switch (locale)
+            {
+                /*
+                case LocaleVersion.fi_FI : 
+                    // We have Finnish available... or not. :)
+                    LocaleHelper.Initialize(LocaleVersion.fi_FI);
+                    break;
+                */
+                default:
+                    // Plugins should default to English...
+                    LocaleHelper.Initialize(LocaleVersion.en_US);
+                    break;
+            }
+            this.pluginDesc = LocaleHelper.GetString("Info.Description");
         }
 
         #endregion
