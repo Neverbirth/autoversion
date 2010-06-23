@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AutoVersion.Resources;
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,6 +24,11 @@ namespace AutoVersion
         public VersionDialog()
         {
             InitializeComponent();
+
+            this.Text = LocaleHelper.GetString("Title.VersionDialog");
+            this.ButtonCancel.Text = LocaleHelper.GetString("Label.CancelButton");
+            this.ButtonOk.Text = LocaleHelper.GetString("Label.OkButton");
+            this.LabelVersion.Text = LocaleHelper.GetString("Label.Version");
         }
 
         #endregion

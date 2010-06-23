@@ -64,6 +64,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Qreed\Reflection\EnumHelper.cs" />
     <Compile Include="Qreed\Reflection\ReflectionHelper.cs" />
+    <Compile Include="Resources\en_US.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>en_US.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\LocaleHelper.cs" />
     <Compile Include="Utils\IOUtils.cs" />
     <Compile Include="Utils\ProjectUtils.cs" />
     <Compile Include="Utils\XmlUtils.cs" />
@@ -82,6 +88,11 @@
     <Content Include="Libs\ProjectManager.dll" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\en_US.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>en_US.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="VersionDialog.resx">
       <DependentUpon>VersionDialog.cs</DependentUpon>
     </EmbeddedResource>
