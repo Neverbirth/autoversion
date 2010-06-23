@@ -98,7 +98,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Templates\AutoVersion\ActionScript 2.fdt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
