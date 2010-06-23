@@ -5,9 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text;
+
+#if NET_35
+using System.Linq;
 using System.Xml.Linq;
+#else
+using AutoVersion.Utils;
+using System.Xml;
+#endif
 
 namespace AutoVersion
 {
@@ -88,6 +94,8 @@ namespace AutoVersion
             return _instance;
         }
 
+#if NET_35
+
         public override void Load()
         {
             try
@@ -152,6 +160,78 @@ namespace AutoVersion
 
             projectVersionDocument.Save(_globalSettingsFile);
         }
+
+#else
+
+        public override void Load()
+        {
+            try
+            {
+                using (XmlTextReader projectVersionDocument = new XmlTextReader(_globalSettingsFile))
+                {
+
+                    projectVersionDocument.MoveToContent();
+
+                    Apply = (ApplyGlobalSettings)Enum.Parse(typeof(ApplyGlobalSettings),
+                                   XmlUtils.GetAttributeValue(projectVersionDocument, "apply", "OnlyWhenChosen"));
+                    AutoUpdateVersionData = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "autoUpdateVersionData", "false"));
+                    IncrementBeforeBuild = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "incrementBeforeBuild", "true"));
+                    UpdateAirVersion = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "updateAirVersion", "false"));
+
+                    try
+                    {
+                        BuildAction = (BuildActionType)Enum.Parse(typeof (BuildActionType),
+                                       XmlUtils.GetAttributeValue(projectVersionDocument, "buildAction", "Both"));
+                    }
+                    catch (ArgumentException)
+                    {
+                        BuildAction = BuildActionType.Both;
+                    }
+
+                    string versioningStyle = XmlUtils.GetAttributeValue(projectVersionDocument, "versioningStyle",
+                                                                                  VersioningStyle.
+                                                                                      GetDefaultGlobalVariable());
+
+                    VersioningStyle.FromGlobalVariable(versioningStyle);
+                    StartDate = DateTime.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "startDate", "10/21/1975 00:00:00"),
+                        System.Globalization.CultureInfo.InvariantCulture);
+                    SmartUpdate = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "smartUpdate", "false"));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+                //Logger.Write("Error occured while reading BuildVersionIncrement settings from \"" + SolutionItem.Filename + "\"\n" + ex.ToString(), LogLevel.Error);
+            }
+        }
+
+        public override void Save()
+        {
+            using (XmlTextWriter projectVersionDocument = new XmlTextWriter(_globalSettingsFile, Encoding.UTF8))
+            {
+
+                projectVersionDocument.WriteStartDocument();
+                projectVersionDocument.WriteStartElement("autoVersion");
+
+                projectVersionDocument.WriteAttributeString("apply", Apply.ToString());
+                projectVersionDocument.WriteAttributeString("autoUpdateVersionData", AutoUpdateVersionData.ToString());
+                projectVersionDocument.WriteAttributeString("versioningStyle", VersioningStyle.ToGlobalVariable());
+
+                if (BuildAction != BuildActionType.Both)
+                    projectVersionDocument.WriteAttributeString("buildAction", BuildAction.ToString());
+
+                projectVersionDocument.WriteAttributeString("startDate", StartDate.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                projectVersionDocument.WriteAttributeString("incrementBeforeBuild", IncrementBeforeBuild.ToString());
+                projectVersionDocument.WriteAttributeString("smartUpdate", SmartUpdate.ToString());
+                projectVersionDocument.WriteAttributeString("updateAirVersion", UpdateAirVersion.ToString());
+
+                projectVersionDocument.WriteEndElement();
+                projectVersionDocument.WriteEndDocument();
+            }
+
+        }
+
+#endif
 
         #endregion
 
