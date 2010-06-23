@@ -9,7 +9,13 @@ using System.Drawing.Design;
 using System.IO;
 using System.Text;
 using System.Windows.Forms.Design;
+
+#if NET_35
 using System.Xml.Linq;
+#else
+using AutoVersion.Utils;
+using System.Xml;
+#endif
 
 namespace AutoVersion
 {
@@ -107,6 +113,8 @@ namespace AutoVersion
 
         #region  Methods
 
+#if NET_35
+
         /// <summary>
         /// Loads the settings into this instance.
         /// </summary>
@@ -188,6 +196,90 @@ namespace AutoVersion
 
             projectVersionDocument.Save(_versionFile);
         }
+
+#else
+
+        /// <summary>
+        /// Loads the settings into this instance.
+        /// </summary>
+        public override void Load()
+        {
+            try
+            {
+                using (XmlTextReader projectVersionDocument = new XmlTextReader(_versionFile))
+                {
+                    projectVersionDocument.MoveToContent();
+
+                    AutoUpdateVersionData = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "autoUpdateVersionData", "false"));
+                    _versionFilename = XmlUtils.GetAttributeValue(projectVersionDocument, "versionFilename", string.Empty);
+                    _versionTemplateFilename = XmlUtils.GetAttributeValue(projectVersionDocument, "versionTemplateFilename", string.Empty);
+                    _airDescriptorFilename = XmlUtils.GetAttributeValue(projectVersionDocument, "airDescriptorFile", string.Empty);
+                    IncrementBeforeBuild = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "incrementBeforeBuild", "true"));
+                    UseGlobalSettings = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "useGlobalSettings", (GlobalIncrementSettings.GetInstance().Apply == GlobalIncrementSettings.ApplyGlobalSettings.AsDefault).ToString()));
+
+                    try
+                    {
+                        BuildAction = (BuildActionType)Enum.Parse(typeof(BuildActionType), XmlUtils.GetAttributeValue(projectVersionDocument, "buildAction", "Both"));
+                    }
+                    catch (ArgumentException)
+                    {
+                        BuildAction = BuildActionType.Both;
+                    }
+
+                    string versioningStyle = XmlUtils.GetAttributeValue(projectVersionDocument, "versioningStyle", VersioningStyle.GetDefaultGlobalVariable());
+
+                    VersioningStyle.FromGlobalVariable(versioningStyle);
+                    StartDate = DateTime.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "startDate", "10/21/1975 00:00:00"), System.Globalization.CultureInfo.InvariantCulture);
+                    SmartUpdate = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "smartUpdate", "false"));
+                    UpdateAirVersion = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "updateAirVersion", "false"));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+                //Logger.Write("Error occured while reading BuildVersionIncrement settings from \"" + SolutionItem.Filename + "\"\n" + ex.ToString(), LogLevel.Error);
+            }
+        }
+
+        /// <summary>
+        /// Saves the settings of this instance.
+        /// </summary>
+        public override void Save()
+        {
+            using (XmlTextWriter projectVersionDocument = new XmlTextWriter(_versionFile, Encoding.UTF8))
+            {
+
+                projectVersionDocument.WriteStartDocument();
+                projectVersionDocument.WriteStartElement("autoVersion");
+
+                projectVersionDocument.WriteAttributeString("autoUpdateVersionData", AutoUpdateVersionData.ToString());
+                projectVersionDocument.WriteAttributeString("versioningStyle", VersioningStyle.ToGlobalVariable());
+
+                if (!string.IsNullOrEmpty(VersionFilename))
+                    projectVersionDocument.WriteAttributeString("versionFilename", VersionFilename);
+
+                if (!string.IsNullOrEmpty(VersionTemplateFilename))
+                    projectVersionDocument.WriteAttributeString("versionTemplateFilename", VersionTemplateFilename);
+
+                if (!string.IsNullOrEmpty(AirDescriptorFile))
+                    projectVersionDocument.WriteAttributeString("airDescriptorFile", AirDescriptorFile);
+
+                if (BuildAction != BuildActionType.Both)
+                    projectVersionDocument.WriteAttributeString("buildAction", BuildAction.ToString());
+
+                projectVersionDocument.WriteAttributeString("startDate", StartDate.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                projectVersionDocument.WriteAttributeString("incrementBeforeBuild", IncrementBeforeBuild.ToString());
+                projectVersionDocument.WriteAttributeString("smartUpdate", SmartUpdate.ToString());
+                projectVersionDocument.WriteAttributeString("useGlobalSettings", UseGlobalSettings.ToString());
+                projectVersionDocument.WriteAttributeString("updateAirVersion", UpdateAirVersion.ToString());
+
+                projectVersionDocument.WriteEndElement();
+                projectVersionDocument.WriteEndDocument();
+            }
+        }
+
+#endif
 
         #endregion
     }

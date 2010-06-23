@@ -1,12 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using PluginCore;
 using PluginCore.Helpers;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+#if NET_35
+using System.Linq;
 using System.Xml.Linq;
+#else
+using System.Xml;
+#endif
 
 namespace AutoVersion
 {
@@ -54,7 +59,7 @@ namespace AutoVersion
             this.IncrementSettings = new ProjectItemIncrementSettings();
             this.IncrementSettings.Load();
 
-            switch (PluginCore.PluginBase.CurrentProject.Language)
+            switch (PluginBase.CurrentProject.Language)
             {
                 case "as2":
                     this.ProjectType = LanguageType.ActionScript2;
@@ -106,7 +111,7 @@ namespace AutoVersion
             }
             else
             {
-                retVal = PluginCore.PluginBase.CurrentProject.GetAbsolutePath(IncrementSettings.VersionTemplateFilename);
+                retVal = PluginBase.CurrentProject.GetAbsolutePath(IncrementSettings.VersionTemplateFilename);
             }
 
             return retVal;
@@ -114,7 +119,24 @@ namespace AutoVersion
 
         private static string GetVersionArgRegexLine(IEnumerable<string> templateLines, string versionArg)
         {
+#if NET_35
+
             string dataLine = templateLines.FirstOrDefault(x => x.Contains(versionArg));
+
+#else
+
+            string dataLine = null;
+
+            foreach (string line in templateLines)
+            {
+                if (line.Contains(versionArg))
+                {
+                    dataLine = line;
+                    break;
+                }
+            }
+
+#endif
 
             if (string.IsNullOrEmpty(dataLine)) return "0";
 
@@ -123,7 +145,17 @@ namespace AutoVersion
 
         private static IEnumerable<string> GetVersionArgRegexLines(IEnumerable<string> templateLines, string versionArg)
         {
+#if NET_35
             return templateLines.Where(x => x.Contains(versionArg)).Select(x => LineToRegExPattern(x, versionArg));
+#else
+            foreach (string line in templateLines)
+            {
+                if (line.Contains(versionArg))
+                {
+                    yield return LineToRegExPattern(line, versionArg);
+                }
+            }
+#endif
         }
 
         public string GetVersionFilename()
@@ -133,13 +165,13 @@ namespace AutoVersion
             if (!string.IsNullOrEmpty(IncrementSettings.VersionFilename))
             {
                 filename = IncrementSettings.VersionFilename;
-                return PluginCore.PluginBase.CurrentProject.GetAbsolutePath(filename);
+                return PluginBase.CurrentProject.GetAbsolutePath(filename);
             }
             else
             {
-                string basePath = PluginCore.PluginBase.CurrentProject.GetAbsolutePath(
+                string basePath = PluginBase.CurrentProject.GetAbsolutePath(
                     Utils.ProjectUtils.GetBaseSourcePath() ?? Path.GetDirectoryName(
-                        PluginCore.PluginBase.CurrentProject.ProjectPath));
+                        PluginBase.CurrentProject.ProjectPath));
                 filename = "Version." + (ProjectType == LanguageType.Haxe ? "hx" : "as");
 
                 return Path.Combine(basePath, filename);
@@ -162,7 +194,7 @@ namespace AutoVersion
                 return
                     Regex.Match(versionData, pattern).Captures[0].Value;
             }
-            
+
             return "0";
         }
 
@@ -171,19 +203,33 @@ namespace AutoVersion
             if (this.ProjectType == LanguageType.ActionScript2 || this.ProjectType == LanguageType.None)
                 return false;
 
-            XDocument projectDoc = XDocument.Load(PluginCore.PluginBase.CurrentProject.ProjectPath);
+            string[] compilerOptions;
 
             if (this.ProjectType == LanguageType.ActionScript3)
             {
-                return
-                    (projectDoc.Element("project").Element("build").Elements("option").FirstOrDefault(
-                        x => x.Attribute("additional") != null &&
-                            x.Attribute("additional").Value.Split('\n').Contains("+configname=air")) != null);
+                compilerOptions = ((ProjectManager.Projects.AS3.AS3Project)PluginBase.CurrentProject).CompilerOptions.Additional;
+                foreach (string compilerOption in compilerOptions)
+                {
+                    if (compilerOption.Contains("configname=air"))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
-            
-            return
-                (projectDoc.Element("project").Element("haxelib").Elements("library").FirstOrDefault(x => x.Attribute("name").Value == "air") !=
-                 null);
+
+            compilerOptions = ((ProjectManager.Projects.Haxe.HaxeProject)PluginBase.CurrentProject).CompilerOptions.Libraries;
+
+            foreach (string name in compilerOptions)
+            {
+                if (name == "air")
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static string LineToRegExPattern(string line, string arg)
@@ -214,7 +260,25 @@ namespace AutoVersion
             {
                 string fileVersionData = FileHelper.ReadFile(versionFile);
 
+#if NET_35
                 IEnumerable<string> templateLines = File.ReadAllLines(GetTemplateFileName()).Where(x => x.Contains("$(Major)") || x.Contains("$(Minor)") || x.Contains("$(Build)") || x.Contains("$(Revision)"));
+#else
+                List<string> templateLines = new List<string>();
+                string[] templateFileLines = File.ReadAllLines(GetTemplateFileName());
+                string templateLine;
+
+                for (int i = 0, lineCount = templateFileLines.Length; i < lineCount; i++)
+                {
+                    templateLine = templateFileLines[i];
+
+                    if (templateLine.Contains("$(Major)") || templateLine.Contains("$(Minor)") || templateLine.Contains("$(Build)") || templateLine.Contains("$(Revision)"))
+                    {
+                        templateLines.Add(templateLine);
+                    }
+
+                }
+
+#endif
 
                 string major = GetVersionDataValue(fileVersionData, GetVersionArgRegexLine(templateLines, "$(Major)"));
                 string minor = GetVersionDataValue(fileVersionData, GetVersionArgRegexLine(templateLines, "$(Minor)"));
@@ -232,7 +296,7 @@ namespace AutoVersion
             string fileName = Path.GetFileNameWithoutExtension(path);
 
             // Process common args
-            content = PluginCore.PluginBase.MainForm.ProcessArgString(content);
+            content = PluginBase.MainForm.ProcessArgString(content);
 
             // Process other args with needed info
             content = content.Replace("$(FileName)", fileName);
@@ -277,7 +341,7 @@ namespace AutoVersion
         {
             string versionFile = GetVersionFilename();
             string content;
-            Encoding encoding = Encoding.GetEncoding((Int32)PluginCore.PluginBase.Settings.DefaultCodePage);
+            Encoding encoding = Encoding.GetEncoding((Int32)PluginBase.Settings.DefaultCodePage);
 
             if (!IncrementSettings.SmartUpdate || !File.Exists(versionFile))
             {
@@ -287,7 +351,28 @@ namespace AutoVersion
             {
                 content = FileHelper.ReadFile(versionFile);
 
+#if NET_35
+
                 IEnumerable<string> templateLines = File.ReadAllLines(GetTemplateFileName()).Where(x => x.Contains("$(Major)") || x.Contains("$(Minor)") || x.Contains("$(Build)") || x.Contains("$(Revision)"));
+
+#else
+
+                List<string> templateLines = new List<string>();
+                string[] templateFileLines = File.ReadAllLines(GetTemplateFileName());
+                string line;
+
+                for (int i = 0, templateLinesCount = templateFileLines.Length; i < templateLinesCount; i++)
+                {
+                    line = templateFileLines[i];
+
+                    if (line.Contains("$(Major)") || line.Contains("$(Minor)") || line.Contains("$(Build)") || line.Contains("$(Revision)"))
+                    {
+                        templateLines.Add(line);
+                    }
+                }
+
+
+#endif
 
                 SetVersionDataValue(ref content, GetVersionArgRegexLines(templateLines, "$(Major)"), Version.Major);
                 SetVersionDataValue(ref content, GetVersionArgRegexLines(templateLines, "$(Minor)"), Version.Minor);
@@ -295,8 +380,7 @@ namespace AutoVersion
                 SetVersionDataValue(ref content, GetVersionArgRegexLines(templateLines, "$(Revision)"), Version.Revision);
             }
 
-            FileHelper.WriteFile(versionFile, content,
-                                 encoding, PluginCore.PluginBase.Settings.SaveUnicodeWithBOM);
+            FileHelper.WriteFile(versionFile, content, encoding, PluginBase.Settings.SaveUnicodeWithBOM);
         }
 
         private static void SetVersionDataValue(ref string versionData, IEnumerable<string> patterns, int newValue)
@@ -310,11 +394,13 @@ namespace AutoVersion
             string airPropertiesDescriptor;
 
             if (IncrementSettings.AirDescriptorFile == string.Empty)
-                airPropertiesDescriptor = Path.Combine(Path.GetDirectoryName(PluginCore.PluginBase.CurrentProject.ProjectPath), "application.xml");
+                airPropertiesDescriptor = Path.Combine(Path.GetDirectoryName(PluginBase.CurrentProject.ProjectPath), "application.xml");
             else
-                airPropertiesDescriptor = PluginCore.PluginBase.CurrentProject.GetAbsolutePath(IncrementSettings.AirDescriptorFile);
+                airPropertiesDescriptor = PluginBase.CurrentProject.GetAbsolutePath(IncrementSettings.AirDescriptorFile);
 
             if (!File.Exists(airPropertiesDescriptor)) return;
+
+#if NET_35
 
             XNamespace airNs = "http://ns.adobe.com/air/application/1.5";
 
@@ -333,6 +419,39 @@ namespace AutoVersion
             }
 
             airPropertiesDoc.Save(airPropertiesDescriptor);
+
+#else
+
+            XmlDocument document = new XmlDocument();
+            XmlNodeList versionNodes;
+
+            try
+            {
+                document.Load(airPropertiesDescriptor);
+                versionNodes = document.GetElementsByTagName("version", "http://ns.adobe.com/air/application/1.5");
+
+                if (versionNodes.Count == 0)
+                {
+                    XmlNode versionNode = document.CreateElement("version");
+                    versionNode.InnerText = Version.ToString();
+
+                    document.DocumentElement.AppendChild(versionNode);
+                }
+                else
+                {
+                    versionNodes[0].InnerText = Version.ToString();
+                }
+
+                document.Save(airPropertiesDescriptor);
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
+
+
+#endif
+
         }
 
         #endregion
