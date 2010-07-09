@@ -4,10 +4,10 @@ $(CBI)* @author $(DefaultUser)
 $(CBI)*/
 class $(FileNameWithPackage) $(CSLB){
 		
-	static public var Major:int = $(Major);
-	static public var Minor:int = $(Minor);
-	static public var Build:int = $(Build);
-	static public var Revision:int = $(Revision);
+	static public var Major:Number = $(Major);
+	static public var Minor:Number = $(Minor);
+	static public var Build:Number = $(Build);
+	static public var Revision:Number = $(Revision);
 	
 	private function $(FileName)() $(CSLB){
 		
