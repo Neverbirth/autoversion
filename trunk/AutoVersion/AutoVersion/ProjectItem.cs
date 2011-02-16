@@ -44,6 +44,15 @@ namespace AutoVersion
     class ProjectItem
     {
 
+        #region Constants
+
+        /// <summary>
+        /// Regex for tab replacing
+        /// </summary>
+        private static Regex reTabs = new Regex("^\\t+", RegexOptions.Multiline | RegexOptions.Compiled);
+
+        #endregion
+
         #region  Properties
 
         public Version Version { get; set; }
@@ -261,7 +270,9 @@ namespace AutoVersion
                 string fileVersionData = FileHelper.ReadFile(versionFile);
 
 #if NET_35
-                IEnumerable<string> templateLines = File.ReadAllLines(GetTemplateFileName()).Where(x => x.Contains("$(Major)") || x.Contains("$(Minor)") || x.Contains("$(Build)") || x.Contains("$(Revision)"));
+                IEnumerable<string> templateLines = File.ReadAllLines(GetTemplateFileName()).
+                    Where(x => x.Contains("$(Major)") || x.Contains("$(Minor)") || x.Contains("$(Build)") || x.Contains("$(Revision)")).
+                    Select(x => !PluginBase.Settings.UseTabs ? reTabs.Replace(x, new MathEvaluator(ReplaceTabs)) : x);
 #else
                 List<string> templateLines = new List<string>();
                 string[] templateFileLines = File.ReadAllLines(GetTemplateFileName());
@@ -273,6 +284,8 @@ namespace AutoVersion
 
                     if (templateLine.Contains("$(Major)") || templateLine.Contains("$(Minor)") || templateLine.Contains("$(Build)") || templateLine.Contains("$(Revision)"))
                     {
+                        if (!PluginBase.Settings.UseTabs) templateLine = reTabs.Replace(templateLine, new MatchEvaluator(ReplaceTabs));
+                        
                         templateLines.Add(templateLine);
                     }
 
@@ -295,9 +308,6 @@ namespace AutoVersion
         {
             string fileName = Path.GetFileNameWithoutExtension(path);
 
-            // Process common args
-            content = PluginBase.MainForm.ProcessArgString(content);
-
             // Process other args with needed info
             content = content.Replace("$(FileName)", fileName);
 
@@ -317,11 +327,14 @@ namespace AutoVersion
 
                 content = content.Replace("$(Package)", package);
 
-                if (package != "")
+                if (package != String.Empty)
                     content = content.Replace("$(FileNameWithPackage)", package + "." + fileName);
                 else
                     content = content.Replace("$(FileNameWithPackage)", fileName);
             }
+
+            // Process common args
+            content = PluginBase.MainForm.ProcessArgString(content);
 
             // Process action points just in case...
             content = content.Replace(SnippetHelper.BOUNDARY, string.Empty).
@@ -335,6 +348,14 @@ namespace AutoVersion
                 Replace("$(Revision)", Version.Revision.ToString());
 
             return content;
+        }
+
+        /// <summary>
+        /// Match evaluator for tabs
+        /// </summary>
+        private static String ReplaceTabs(Match match)
+        {
+            return new String(' ', match.Length * PluginBase.Settings.IndentSize);
         }
 
         public void SaveVersion()
