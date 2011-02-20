@@ -49,7 +49,7 @@ namespace AutoVersion
         /// <summary>
         /// Regex for tab replacing
         /// </summary>
-        private static Regex reTabs = new Regex("^\\t+", RegexOptions.Multiline | RegexOptions.Compiled);
+        private readonly static Regex reTabs = new Regex("^\\t+", RegexOptions.Multiline | RegexOptions.Compiled);
 
         #endregion
 
@@ -93,7 +93,7 @@ namespace AutoVersion
             IncrementSettings.CopyFrom(GlobalIncrementSettings.GetInstance());
         }
 
-        private string GetTemplateFileName()
+        public string GetTemplateFileName()
         {
             string retVal;
 

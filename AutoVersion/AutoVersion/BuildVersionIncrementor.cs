@@ -27,7 +27,6 @@ namespace AutoVersion
     {
         private BuildAction _currentBuildAction;
         private BuildState _currentBuildState;
-        private PluginMain _pluginMain;
         private ProjectItem _projectItem;
         private DateTime _buildStartDate = DateTime.MinValue;
 
@@ -54,10 +53,8 @@ namespace AutoVersion
         /// <summary>
         /// Initializes a new instance of the <see cref="BuildVersionIncrementor"/> class.
         /// </summary>
-        /// <param name="pluginMain">The base instance.</param>
-        public BuildVersionIncrementor(PluginMain pluginMain)
+        public BuildVersionIncrementor()
         {
-            _pluginMain = pluginMain;
             _instance = this;
         }
 
@@ -160,7 +157,6 @@ namespace AutoVersion
         public void Dispose()
         {
             _projectItem = null;
-            _pluginMain = null;
         }
 
         #endregion

@@ -66,6 +66,15 @@ namespace AutoVersion
 
         #endregion
 
+        #region Constructor
+
+        public PluginMain()
+        {
+            _incrementor = new BuildVersionIncrementor();
+        }
+
+        #endregion
+
         #region  Event Handlers
 
         private void ToolStripItemAutoVersion_Click(Object sender, EventArgs e)
@@ -96,7 +105,6 @@ namespace AutoVersion
 
         public void Initialize()
         {
-            _incrementor = new BuildVersionIncrementor(this);
             _incrementor.InitializeIncrementors();
             
             PluginCore.Managers.EventManager.AddEventHandler(this, EventType.Command | EventType.UIStarted);
