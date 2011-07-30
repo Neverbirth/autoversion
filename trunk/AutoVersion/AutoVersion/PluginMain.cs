@@ -34,6 +34,11 @@ namespace AutoVersion
         
         #region  Properties
 
+        public int Api
+        {
+            get { return 1; }
+        }
+
         public string Author
         {
             get { return pluginName; }

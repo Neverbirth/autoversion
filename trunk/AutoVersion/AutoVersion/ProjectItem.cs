@@ -285,7 +285,7 @@ namespace AutoVersion
                     if (templateLine.Contains("$(Major)") || templateLine.Contains("$(Minor)") || templateLine.Contains("$(Build)") || templateLine.Contains("$(Revision)"))
                     {
                         if (!PluginBase.Settings.UseTabs) templateLine = reTabs.Replace(templateLine, new MatchEvaluator(ReplaceTabs));
-                        
+
                         templateLines.Add(templateLine);
                     }
 
@@ -448,12 +448,28 @@ namespace AutoVersion
 
             try
             {
+                Version descriptorVersion;
+                string versionTag;
+
                 document.Load(airPropertiesDescriptor);
-                versionNodes = document.GetElementsByTagName("version", "http://ns.adobe.com/air/application/1.5");
+
+                descriptorVersion =
+                    new Version(document.DocumentElement.NamespaceURI.Replace("http://ns.adobe.com/air/application/",
+                                                                              string.Empty));
+                if (descriptorVersion.CompareTo(new Version(2, 5)) < 0)
+                {
+                    versionTag = "version";
+                }
+                else
+                {
+                    versionTag = "versionNumber";
+                }
+
+                versionNodes = document.GetElementsByTagName(versionTag, string.Format("http://ns.adobe.com/air/application/{0}", descriptorVersion));
 
                 if (versionNodes.Count == 0)
                 {
-                    XmlNode versionNode = document.CreateElement("version");
+                    XmlNode versionNode = document.CreateElement(versionTag);
                     versionNode.InnerText = Version.ToString();
 
                     document.DocumentElement.AppendChild(versionNode);
