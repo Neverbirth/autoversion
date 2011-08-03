@@ -14,6 +14,7 @@
   # AutoVersion creates a file named <project name>.version under my project path, what is it?
   # Is it possible to version two or more different projects located on the same folder?
   # I'd like to use AutoVersion as a build counter, is the feature available?
+  # Now that FlashDevelop 4 is available, will later versions of AutoVersion be available for FD 3 as well?
  * [FAQ#BVI_Questions BVI Questions]:
   # Why using BVI as the base of AutoVersion?
   # I'd like to use a BVI plugin with AutoVersion, is it possible?
@@ -32,7 +33,7 @@
 ==AutoVersion Questions==
 
  * Where can I locate the AutoVersion menu?
- AutoVersion dialog is by default located in the Tools menu as the first item.
+ AutoVersion dialog is by default located in the Project menu as the last item.
 
  * OK, how do I use it?
  In order to enable it you must first enable the "Update version data" option, and choose whatever versioning style fits in your project.
@@ -58,6 +59,8 @@
  * I'd like to use AutoVersion as a build counter, is the feature available?
  You can already use the Increment versioning style and your own template in order to have a build counter.
 
+ * Now that FlashDevelop 4 is available, will later versions of AutoVersion be available for FD 3 as well?
+ I'm not using FD 3 anymore, so it won't be targetted, however, if people ask for it, I don't mind releasing compatible versions of the plugin.
 
 ==BVI Questions==
 
