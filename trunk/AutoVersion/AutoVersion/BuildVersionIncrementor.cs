@@ -1,4 +1,5 @@
-﻿using AutoVersion.Incrementors;
+﻿using AutoVersion.Extensions;
+using AutoVersion.Incrementors;
 
 using PluginCore;
 
@@ -107,9 +108,7 @@ namespace AutoVersion
         private void UpdateProject()
         {
             ProjectItemIncrementSettings settings = _projectItem.IncrementSettings;
-            if (settings.BuildAction == BuildActionType.Both ||
-                  (settings.BuildAction == BuildActionType.Build && _currentBuildAction == BuildAction.Building) ||
-                  (settings.BuildAction == BuildActionType.Testing && _currentBuildAction == BuildAction.Testing))
+            if (_currentBuildAction.Equals(settings.BuildAction))
             {
                 if (_projectItem.IncrementSettings.IncrementBeforeBuild == (_currentBuildState == BuildState.BuildInProgress))
                 {
@@ -120,7 +119,8 @@ namespace AutoVersion
                             ? _buildStartDate.ToUniversalTime()
                             : _buildStartDate,
                         _projectItem.IncrementSettings.StartDate,
-                        PluginBase.CurrentProject.ProjectPath);
+                        PluginBase.CurrentProject.ProjectPath,
+                        _currentBuildAction);
 
                     _projectItem.SaveVersion();
 
