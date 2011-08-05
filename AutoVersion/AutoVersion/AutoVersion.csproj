@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="DateSpan.cs" />
     <Compile Include="Design\FileNameEditorEx.cs" />
+    <Compile Include="Extensions\BuildActionExtensions.cs" />
     <Compile Include="GlobalIncrementSettings.cs" />
     <Compile Include="Incrementors\BaseIncrementor.cs" />
     <Compile Include="Incrementors\BaseIncrementorConverter.cs" />
@@ -114,7 +115,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.TimeStamp" BuildVersion_ConfigurationName="Release" />
+      <UserProperties BuildVersion_ConfigurationName="Release" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.TimeStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

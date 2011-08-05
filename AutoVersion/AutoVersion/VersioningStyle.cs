@@ -1,4 +1,5 @@
-﻿using AutoVersion.Incrementors;
+﻿using AutoVersion.Extensions;
+using AutoVersion.Incrementors;
 
 using System;
 using System.Collections.Generic;
@@ -145,6 +146,10 @@ namespace AutoVersion
             Minor = other.Minor;
             Build = other.Build;
             Revision = other.Revision;
+            MajorIncrementActionType = other.MajorIncrementActionType;
+            MinorIncrementActionType = other.MinorIncrementActionType;
+            BuildIncrementActionType = other.BuildIncrementActionType;
+            RevisionIncrementActionType = other.RevisionIncrementActionType;
         }
 
         /// <summary>
@@ -201,13 +206,25 @@ namespace AutoVersion
         /// <param name="buildStartDate">The build start date.</param>
         /// <param name="projectStartDate">The project start date.</param>
         /// <returns>The incremented version.</returns>
-        internal Version Increment(Version currentVersion, DateTime buildStartDate, DateTime projectStartDate, string projectFilePath)
+        internal Version Increment(Version currentVersion, DateTime buildStartDate, DateTime projectStartDate, string projectFilePath, BuildAction buildAction)
         {
+            
+            int major = currentVersion.Major;
+            int minor = currentVersion.Minor;
+            int build = currentVersion.Build;
+            int revision = currentVersion.Revision;
 
-            int major = Major == null ? currentVersion.Major : Major.Increment(currentVersion.Major, buildStartDate, projectStartDate, projectFilePath);
-            int minor = Minor == null ? currentVersion.Minor : Minor.Increment(currentVersion.Minor, buildStartDate, projectStartDate, projectFilePath);
-            int build = Build == null ? currentVersion.Build : Build.Increment(currentVersion.Build, buildStartDate, projectStartDate, projectFilePath);
-            int revision = Revision == null ? currentVersion.Revision : Revision.Increment(currentVersion.Revision, buildStartDate, projectStartDate, projectFilePath);
+            if (Major != null && buildAction.Equals(MajorIncrementActionType))
+                Major.Increment(currentVersion.Major, buildStartDate, projectStartDate, projectFilePath);
+
+            if (Minor != null && buildAction.Equals(MinorIncrementActionType))
+                Minor.Increment(currentVersion.Minor, buildStartDate, projectStartDate, projectFilePath);
+
+            if (Build != null && buildAction.Equals(BuildIncrementActionType))
+                Build.Increment(currentVersion.Build, buildStartDate, projectStartDate, projectFilePath);
+
+            if (Revision != null && buildAction.Equals(RevisionIncrementActionType))
+                Revision.Increment(currentVersion.Revision, buildStartDate, projectStartDate, projectFilePath);
 
             return new Version(major, minor, build, revision);
         }
@@ -273,6 +290,16 @@ namespace AutoVersion
             }
         }
 
+        /// <summary>
+        /// Gets or sets the major increment action type.
+        /// </summary>
+        /// <value>The build major action type.</value>
+        [DisplayName("Major build type")]
+        [Description("Major update build action type")]
+        [NotifyParentProperty(true)]
+        [DefaultValue(BuildActionType.Both)]
+        public BuildActionType MajorIncrementActionType { get; set; }
+
         private BaseIncrementor _minor = BuiltInBaseIncrementor.NoneIncrementor.Instance;
         /// <summary>
         /// Gets or sets the minor increment style.
@@ -289,6 +316,16 @@ namespace AutoVersion
                 this._minor = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the minor increment action type.
+        /// </summary>
+        /// <value>The minor increment action type.</value>
+        [DisplayName("Minor build type")]
+        [Description("Minor update build action type")]
+        [NotifyParentProperty(true)]
+        [DefaultValue(BuildActionType.Both)]
+        public BuildActionType MinorIncrementActionType { get; set; }
 
         private BaseIncrementor _build = BuiltInBaseIncrementor.NoneIncrementor.Instance;
         /// <summary>
@@ -307,6 +344,16 @@ namespace AutoVersion
             }
         }
 
+        /// <summary>
+        /// Gets or sets the build increment action type.
+        /// </summary>
+        /// <value>The build increment action type.</value>
+        [DisplayName("Build build type")]
+        [Description("Build update build action type")]
+        [NotifyParentProperty(true)]
+        [DefaultValue(BuildActionType.Both)]
+        public BuildActionType BuildIncrementActionType { get; set; }
+
         private BaseIncrementor _revision = BuiltInBaseIncrementor.NoneIncrementor.Instance;
         /// <summary>
         /// Gets or sets the revision increment style.
@@ -323,6 +370,17 @@ namespace AutoVersion
                 this._revision = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the revision increment action type.
+        /// </summary>
+        /// <value>The revision increment action type.</value>
+        [DisplayName("Revision build type")]
+        [Description("Revision update build action type")]
+        [NotifyParentProperty(true)]
+        [DefaultValue(BuildActionType.Both)]
+        public BuildActionType RevisionIncrementActionType { get; set; }
+
     }
 }
 
