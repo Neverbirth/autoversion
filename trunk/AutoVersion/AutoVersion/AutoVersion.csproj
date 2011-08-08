@@ -51,11 +51,16 @@
     <Compile Include="DateSpan.cs" />
     <Compile Include="Design\FileNameEditorEx.cs" />
     <Compile Include="Extensions\BuildActionExtensions.cs" />
+    <Compile Include="Extensions\ExtensionAttribute.cs" />
     <Compile Include="GlobalIncrementSettings.cs" />
     <Compile Include="Incrementors\BaseIncrementor.cs" />
     <Compile Include="Incrementors\BaseIncrementorConverter.cs" />
     <Compile Include="Incrementors\BuiltInBaseIncrementor.cs" />
     <Compile Include="Incrementors\IncrementorCollection.cs" />
+    <Compile Include="Incrementors\PostProcessors\BasePostProcessorConverter.cs" />
+    <Compile Include="Incrementors\PostProcessors\BasePostProcessor.cs" />
+    <Compile Include="Incrementors\PostProcessors\BuiltInBasePostProcessor.cs" />
+    <Compile Include="Incrementors\PostProcessors\PostProcessorCollection.cs" />
     <Compile Include="PluginMain.cs" />
     <Compile Include="ProjectItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -115,7 +120,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_ConfigurationName="Release" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.TimeStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.TimeStamp" BuildVersion_ConfigurationName="Release" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

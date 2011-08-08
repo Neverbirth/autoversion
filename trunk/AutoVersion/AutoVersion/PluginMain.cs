@@ -111,6 +111,7 @@ namespace AutoVersion
         public void Initialize()
         {
             _incrementor.InitializeIncrementors();
+            _incrementor.InitializePostProcessors();
             
             PluginCore.Managers.EventManager.AddEventHandler(this, EventType.Command | EventType.UIStarted);
 
