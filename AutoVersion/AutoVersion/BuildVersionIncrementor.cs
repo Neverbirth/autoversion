@@ -1,5 +1,6 @@
 ﻿using AutoVersion.Extensions;
 using AutoVersion.Incrementors;
+using AutoVersion.Incrementors.PostProcessors;
 
 using PluginCore;
 
@@ -12,13 +13,13 @@ using System.Reflection;
 
 namespace AutoVersion
 {
-    internal enum BuildAction : byte
+    public enum BuildAction : byte
     {
         Building,
         Testing
     }
 
-    internal enum BuildState : byte
+    public enum BuildState : byte
     {
         BuildInProgress,
         BuildDone
@@ -39,6 +40,16 @@ namespace AutoVersion
         public IncrementorCollection Incrementors
         {
             get { return _incrementors; }
+        }
+
+        private PostProcessorCollection _postProcessors = new PostProcessorCollection();
+        /// <summary>
+        /// Gets the post processors.
+        /// </summary>
+        /// <value>The post processors.</value>
+        public PostProcessorCollection PostProcessors
+        {
+            get { return _postProcessors; }
         }
 
         private static BuildVersionIncrementor _instance;
@@ -75,6 +86,31 @@ namespace AutoVersion
                     Assembly asm = Assembly.LoadFrom(file);
 
                     _incrementors.AddFrom(asm);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+                //                Logger.Write("Exception occured while initializing incrementors.\n" + ex.ToString(), LogLevel.Error);
+            }
+        }
+
+        /// <summary>
+        /// Initializes the processors.
+        /// </summary>
+        public void InitializePostProcessors()
+        {
+            try
+            {
+                _postProcessors.AddFrom(Assembly.GetExecutingAssembly());
+
+                string[] files = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "*.Incrementor.dll");
+
+                foreach (string file in files)
+                {
+                    Assembly asm = Assembly.LoadFrom(file);
+
+                    _postProcessors.AddFrom(asm);
                 }
             }
             catch (Exception ex)
