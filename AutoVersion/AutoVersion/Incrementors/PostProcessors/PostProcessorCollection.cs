@@ -57,7 +57,7 @@ namespace AutoVersion.Incrementors.PostProcessors
 
             foreach (Type t in types)
             {
-                if (t == typeof(BuiltInBaseIncrementor.NoneIncrementor)) // Don't add the null incrementor; this is done in the constructor.
+                if (t == typeof(BuiltInBasePostProcessor.NoneProcessor)) // Don't add the null incrementor; this is done in the constructor.
                     continue;
 
                 BasePostProcessor processor = (BasePostProcessor)Activator.CreateInstance(t);
