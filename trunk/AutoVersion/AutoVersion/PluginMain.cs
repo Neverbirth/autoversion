@@ -4,9 +4,6 @@ using PluginCore;
 using PluginCore.Localization;
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Windows.Forms;
 
 namespace AutoVersion
@@ -134,6 +131,10 @@ namespace AutoVersion
                 {
                     case ProjectManager.ProjectManagerEvents.BuildComplete:
                         _incrementor.OnBuildComplete();
+                        break;
+
+                    case ProjectManager.ProjectManagerEvents.BuildFailed:
+                        _incrementor.OnBuildFailed();
                         break;
 
                     case ProjectManager.ProjectManagerEvents.BuildProject:
