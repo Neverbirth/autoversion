@@ -5,10 +5,7 @@ using AutoVersion.Incrementors.PostProcessors;
 using PluginCore;
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Reflection;
 
 namespace AutoVersion
@@ -144,7 +141,7 @@ namespace AutoVersion
         private void UpdateProject()
         {
             ProjectItemIncrementSettings settings = _projectItem.IncrementSettings;
-            if (_currentBuildAction.Equals(settings.BuildAction))
+            if (_currentBuildAction.EqualsType(settings.BuildAction))
             {
                 if (_projectItem.IncrementSettings.IncrementBeforeBuild == (_currentBuildState == BuildState.BuildInProgress))
                 {

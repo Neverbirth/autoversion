@@ -1,13 +1,11 @@
 ﻿using System.Drawing.Design;
 using AutoVersion.Extensions;
 using AutoVersion.Incrementors;
+using AutoVersion.Incrementors.PostProcessors;
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
 using System.Diagnostics;
-using AutoVersion.Incrementors.PostProcessors;
 
 namespace AutoVersion
 {
@@ -237,17 +235,17 @@ namespace AutoVersion
             int build = currentVersion.Build;
             int revision = currentVersion.Revision;
 
-            if (Major != null && buildAction.Equals(MajorIncrementActionType))
-                Major.Increment(currentVersion.Major, buildStartDate, projectStartDate, projectFilePath);
+            if (Major != null && buildAction.EqualsType(MajorIncrementActionType))
+                major = Major.Increment(currentVersion.Major, buildStartDate, projectStartDate, projectFilePath);
 
-            if (Minor != null && buildAction.Equals(MinorIncrementActionType))
-                Minor.Increment(currentVersion.Minor, buildStartDate, projectStartDate, projectFilePath);
+            if (Minor != null && buildAction.EqualsType(MinorIncrementActionType))
+                minor = Minor.Increment(currentVersion.Minor, buildStartDate, projectStartDate, projectFilePath);
 
-            if (Build != null && buildAction.Equals(BuildIncrementActionType))
-                Build.Increment(currentVersion.Build, buildStartDate, projectStartDate, projectFilePath);
+            if (Build != null && buildAction.EqualsType(BuildIncrementActionType))
+                build = Build.Increment(currentVersion.Build, buildStartDate, projectStartDate, projectFilePath);
 
-            if (Revision != null && buildAction.Equals(RevisionIncrementActionType))
-                Revision.Increment(currentVersion.Revision, buildStartDate, projectStartDate, projectFilePath);
+            if (Revision != null && buildAction.EqualsType(RevisionIncrementActionType))
+                revision = Revision.Increment(currentVersion.Revision, buildStartDate, projectStartDate, projectFilePath);
 
             Version version = new Version(major, minor, build, revision);
 

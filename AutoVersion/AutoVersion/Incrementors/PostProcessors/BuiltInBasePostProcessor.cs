@@ -68,6 +68,9 @@ namespace AutoVersion.Incrementors.PostProcessors
         {
             switch (PostProcessStyle)
             {
+                case PostProcessStyle.None:
+                    return value;
+
                 case PostProcessStyle.ReleaseReset:
                     if (buildAction == BuildAction.Building)
                     {
