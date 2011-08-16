@@ -1,4 +1,5 @@
-﻿using AutoVersion.Extensions;
+﻿using System.Drawing.Design;
+using AutoVersion.Extensions;
 using AutoVersion.Incrementors;
 
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
 using System.Diagnostics;
+using AutoVersion.Incrementors.PostProcessors;
 
 namespace AutoVersion
 {
@@ -128,7 +130,7 @@ namespace AutoVersion
     /// <summary>
     /// Describes the versioning style.
     /// </summary>
-    [TypeConverter(typeof(ExpandableObjectConverter))]
+    [Editor(typeof(Design.VersioningStyleEditor), typeof(UITypeEditor))]
     internal class VersioningStyle
     {
         /// <summary>
@@ -150,6 +152,10 @@ namespace AutoVersion
             MinorIncrementActionType = other.MinorIncrementActionType;
             BuildIncrementActionType = other.BuildIncrementActionType;
             RevisionIncrementActionType = other.RevisionIncrementActionType;
+            MajorProcessor = other.MajorProcessor;
+            MinorProcessor = other.MinorProcessor;
+            BuildProcessor = other.BuildProcessor;
+            RevisionProcessor = other.RevisionProcessor;
         }
 
         /// <summary>
@@ -178,24 +184,40 @@ namespace AutoVersion
         {
             if (!string.IsNullOrEmpty(value))
             {
+                string[] versioningData = value.Split('|');
+
                 // Assuming new enum
                 string[] styles = value.Split(".".ToCharArray());
 
-                if (styles.Length == 4)
+                if (styles.Length != 4 && styles.Length != 12)
+                {
+                    throw (new ApplicationException("Invalid versioning style \"" + value + "\"."));
+                }
+                else
                 {
                     Major = BuildVersionIncrementor.Instance.Incrementors[styles[0]];
                     Minor = BuildVersionIncrementor.Instance.Incrementors[styles[1]];
                     Build = BuildVersionIncrementor.Instance.Incrementors[styles[2]];
                     Revision = BuildVersionIncrementor.Instance.Incrementors[styles[3]];
-                }
-                else
-                {
-                    throw (new ApplicationException("Invalid versioning style \"" + value + "\"."));
+
+                    if (styles.Length == 12)
+                    {
+                        MajorIncrementActionType = (BuildActionType)(Enum.Parse(typeof(BuildActionType), styles[4]));
+                        MinorIncrementActionType = (BuildActionType)(Enum.Parse(typeof(BuildActionType), styles[5]));
+                        BuildIncrementActionType = (BuildActionType)(Enum.Parse(typeof(BuildActionType), styles[6]));
+                        RevisionIncrementActionType = (BuildActionType)(Enum.Parse(typeof(BuildActionType), styles[7]));
+                        MajorProcessor = BuildVersionIncrementor.Instance.PostProcessors[styles[8]];
+                        MinorProcessor = BuildVersionIncrementor.Instance.PostProcessors[styles[9]];
+                        BuildProcessor = BuildVersionIncrementor.Instance.PostProcessors[styles[10]];
+                        RevisionProcessor = BuildVersionIncrementor.Instance.PostProcessors[styles[11]];
+
+                    }
                 }
             }
             else
             {
                 Major = Minor = Build = Revision = null;
+                MajorProcessor = MinorProcessor = BuildProcessor = RevisionProcessor = null;
             }
         }
 
@@ -206,9 +228,10 @@ namespace AutoVersion
         /// <param name="buildStartDate">The build start date.</param>
         /// <param name="projectStartDate">The project start date.</param>
         /// <returns>The incremented version.</returns>
-        internal Version Increment(Version currentVersion, DateTime buildStartDate, DateTime projectStartDate, string projectFilePath, BuildAction buildAction)
+        internal Version Increment(Version currentVersion, DateTime buildStartDate, DateTime projectStartDate,
+            string projectFilePath, BuildAction buildAction, BuildState buildState)
         {
-            
+
             int major = currentVersion.Major;
             int minor = currentVersion.Minor;
             int build = currentVersion.Build;
@@ -226,7 +249,29 @@ namespace AutoVersion
             if (Revision != null && buildAction.Equals(RevisionIncrementActionType))
                 Revision.Increment(currentVersion.Revision, buildStartDate, projectStartDate, projectFilePath);
 
-            return new Version(major, minor, build, revision);
+            Version version = new Version(major, minor, build, revision);
+
+            if (RevisionProcessor != null)
+                version = RevisionProcessor.ProcessVersionValue(version, VersionPart.Revision, buildStartDate,
+                                                             projectStartDate, projectFilePath, buildAction,
+                                                             buildState);
+
+            if (BuildProcessor != null)
+                version = BuildProcessor.ProcessVersionValue(version, VersionPart.Build, buildStartDate,
+                                                             projectStartDate, projectFilePath, buildAction,
+                                                             buildState);
+
+            if (MinorProcessor != null)
+                version = MinorProcessor.ProcessVersionValue(version, VersionPart.Minor, buildStartDate,
+                                                             projectStartDate, projectFilePath, buildAction,
+                                                             buildState);
+
+            if (MajorProcessor != null)
+                version = MajorProcessor.ProcessVersionValue(version, VersionPart.Major, buildStartDate,
+                                                             projectStartDate, projectFilePath, buildAction,
+                                                             buildState);
+
+            return version;
         }
 
         internal static string GetDefaultGlobalVariable()
@@ -242,11 +287,19 @@ namespace AutoVersion
         /// </returns>
         public override string ToString()
         {
-            return string.Format("{0}.{1}.{2}.{3}",
+            return string.Format("{0}.{1}.{2}.{3}.{4}.{5}.{6}.{7}.{8}.{9}.{10}.{11}",
                                  Major.Name,
                                  Minor.Name,
                                  Build.Name,
-                                 Revision.Name);
+                                 Revision.Name,
+                                 MajorIncrementActionType.ToString(),
+                                 MinorIncrementActionType.ToString(),
+                                 BuildIncrementActionType.ToString(),
+                                 RevisionIncrementActionType.ToString(),
+                                 MajorProcessor.Name,
+                                 MinorProcessor.Name,
+                                 BuildProcessor.Name,
+                                 RevisionProcessor.Name);
         }
 
         #region Ugly PropertyGrid reflection code
@@ -256,9 +309,19 @@ namespace AutoVersion
             return _major != BuiltInBaseIncrementor.NoneIncrementor.Instance;
         }
 
+        private bool ShouldSerializeMajorProcessor()
+        {
+            return MajorProcessor != BuiltInBasePostProcessor.NoneProcessor.Instance;
+        }
+
         private bool ShouldSerializeMinor()
         {
             return _minor != BuiltInBaseIncrementor.NoneIncrementor.Instance;
+        }
+
+        private bool ShouldSerializeMinorProcessor()
+        {
+            return MinorProcessor != BuiltInBasePostProcessor.NoneProcessor.Instance;
         }
 
         private bool ShouldSerializeBuild()
@@ -266,9 +329,19 @@ namespace AutoVersion
             return _build != BuiltInBaseIncrementor.NoneIncrementor.Instance;
         }
 
+        private bool ShouldSerializeBuildProcessor()
+        {
+            return BuildProcessor != BuiltInBasePostProcessor.NoneProcessor.Instance;
+        }
+
         private bool ShouldSerializeRevision()
         {
             return _revision != BuiltInBaseIncrementor.NoneIncrementor.Instance;
+        }
+
+        private bool ShouldSerializeRevisionProcessor()
+        {
+            return RevisionProcessor != BuiltInBasePostProcessor.NoneProcessor.Instance;
         }
 
         #endregion
@@ -300,6 +373,20 @@ namespace AutoVersion
         [DefaultValue(BuildActionType.Both)]
         public BuildActionType MajorIncrementActionType { get; set; }
 
+        private BasePostProcessor _majorProcessor = BuiltInBasePostProcessor.NoneProcessor.Instance;
+
+        /// <summary>
+        /// Gets or sets the major post-processing style.
+        /// </summary>
+        /// <value>The major post-processing style.</value>
+        [Description("Major post-processor style")]
+        [NotifyParentProperty(true)]
+        public BasePostProcessor MajorProcessor
+        {
+            get { return _majorProcessor; }
+            set { _majorProcessor = value; }
+        }
+
         private BaseIncrementor _minor = BuiltInBaseIncrementor.NoneIncrementor.Instance;
         /// <summary>
         /// Gets or sets the minor increment style.
@@ -326,6 +413,20 @@ namespace AutoVersion
         [NotifyParentProperty(true)]
         [DefaultValue(BuildActionType.Both)]
         public BuildActionType MinorIncrementActionType { get; set; }
+
+        private BasePostProcessor _minorProcessor = BuiltInBasePostProcessor.NoneProcessor.Instance;
+
+        /// <summary>
+        /// Gets or sets the minor post-processing style.
+        /// </summary>
+        /// <value>The minor post-processing style.</value>
+        [Description("Minor post-processor style")]
+        [NotifyParentProperty(true)]
+        public BasePostProcessor MinorProcessor
+        {
+            get { return _minorProcessor; }
+            set { _minorProcessor = value; }
+        }
 
         private BaseIncrementor _build = BuiltInBaseIncrementor.NoneIncrementor.Instance;
         /// <summary>
@@ -354,6 +455,20 @@ namespace AutoVersion
         [DefaultValue(BuildActionType.Both)]
         public BuildActionType BuildIncrementActionType { get; set; }
 
+        private BasePostProcessor _buildProcessor = BuiltInBasePostProcessor.NoneProcessor.Instance;
+
+        /// <summary>
+        /// Gets or sets the build post-processing style.
+        /// </summary>
+        /// <value>The build post-processing style.</value>
+        [Description("Build post-processor style")]
+        [NotifyParentProperty(true)]
+        public BasePostProcessor BuildProcessor
+        {
+            get { return _buildProcessor; }
+            set { _buildProcessor = value; }
+        }
+
         private BaseIncrementor _revision = BuiltInBaseIncrementor.NoneIncrementor.Instance;
         /// <summary>
         /// Gets or sets the revision increment style.
@@ -380,6 +495,20 @@ namespace AutoVersion
         [NotifyParentProperty(true)]
         [DefaultValue(BuildActionType.Both)]
         public BuildActionType RevisionIncrementActionType { get; set; }
+
+        private BasePostProcessor _revisionProcessor = BuiltInBasePostProcessor.NoneProcessor.Instance;
+
+        /// <summary>
+        /// Gets or sets the revision post-processing style.
+        /// </summary>
+        /// <value>The revision post-processing style.</value>
+        [Description("Revision post-processor style")]
+        [NotifyParentProperty(true)]
+        public BasePostProcessor RevisionProcessor
+        {
+            get { return _revisionProcessor; }
+            set { _revisionProcessor = value; }
+        }
 
     }
 }

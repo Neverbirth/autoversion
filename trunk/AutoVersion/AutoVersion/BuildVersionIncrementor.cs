@@ -156,7 +156,7 @@ namespace AutoVersion
                             : _buildStartDate,
                         _projectItem.IncrementSettings.StartDate,
                         PluginBase.CurrentProject.ProjectPath,
-                        _currentBuildAction);
+                        _currentBuildAction, _currentBuildState);
 
                     _projectItem.SaveVersion();
 
