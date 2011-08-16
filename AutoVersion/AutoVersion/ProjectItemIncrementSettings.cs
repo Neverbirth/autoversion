@@ -34,6 +34,16 @@ namespace AutoVersion
 
         #region  Properties
 
+        /// <summary>
+        /// Gets or sets the name of the configuration.
+        /// </summary>
+        /// <value>The name of the configuration.</value>
+        [Category("Condition")]
+        [DefaultValue(BuildConfiguration.Any)]
+        [DisplayName("Configuration type")]
+        [Description("Set this to the type of the configuration when the auto update should occur.")]
+        public BuildConfiguration ConfigurationType { get; set; }
+        
         private string _versionFilename = string.Empty;
         /// <summary>
         /// Gets or sets the version info filename.
@@ -220,6 +230,15 @@ namespace AutoVersion
 
                     try
                     {
+                        ConfigurationType = (BuildConfiguration)Enum.Parse(typeof(BuildConfiguration), XmlUtils.GetAttributeValue(projectVersionDocument, "configurationType", "Any"));
+                    }
+                    catch (ArgumentException)
+                    {
+                        ConfigurationType = BuildConfiguration.Any;
+                    }
+
+                    try
+                    {
                         BuildAction = (BuildActionType)Enum.Parse(typeof(BuildActionType), XmlUtils.GetAttributeValue(projectVersionDocument, "buildAction", "Both"));
                     }
                     catch (ArgumentException)
@@ -268,6 +287,9 @@ namespace AutoVersion
 
                 if (BuildAction != BuildActionType.Both)
                     projectVersionDocument.WriteAttributeString("buildAction", BuildAction.ToString());
+
+                if (ConfigurationType != BuildConfiguration.Any)
+                    projectVersionDocument.WriteAttributeString("configurationType", ConfigurationType.ToString());
 
                 projectVersionDocument.WriteAttributeString("startDate", StartDate.ToString(System.Globalization.CultureInfo.InvariantCulture));
                 projectVersionDocument.WriteAttributeString("incrementBeforeBuild", IncrementBeforeBuild.ToString());

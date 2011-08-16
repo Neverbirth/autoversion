@@ -16,6 +16,13 @@ namespace AutoVersion
         Testing
     }
 
+    public enum BuildConfiguration : byte
+    {
+        Any,
+        Build,
+        Debug
+    }
+
     public enum BuildState : byte
     {
         BuildInProgress,
@@ -141,7 +148,7 @@ namespace AutoVersion
         private void UpdateProject()
         {
             ProjectItemIncrementSettings settings = _projectItem.IncrementSettings;
-            if (_currentBuildAction.EqualsType(settings.BuildAction))
+            if (_currentBuildAction.EqualsType(settings.BuildAction) && settings.ConfigurationType.IsEqualToTraceValue(PluginBase.CurrentProject.TraceEnabled))
             {
                 if (_projectItem.IncrementSettings.IncrementBeforeBuild == (_currentBuildState == BuildState.BuildInProgress))
                 {
@@ -169,6 +176,11 @@ namespace AutoVersion
         {
             _currentBuildState = BuildState.BuildDone;
             ExecuteIncrement();
+        }
+
+        public void OnBuildFailed()
+        {
+
         }
 
         public void OnBuilding(BuildAction action)
