@@ -40,10 +40,20 @@ namespace AutoVersion
         /// <value>The name of the configuration.</value>
         [Category("Condition")]
         [DefaultValue(BuildConfiguration.Any)]
-        [DisplayName("Configuration type")]
+        [DisplayName("Configuration Type")]
         [Description("Set this to the type of the configuration when the auto update should occur.")]
         public BuildConfiguration ConfigurationType { get; set; }
-        
+
+        /// <summary>
+        /// Gets or sets whether the version increment should be reverted in case of a build fail.
+        /// </summary>
+        /// <value>The value.</value>
+        [Category("Increment Settings")]
+        [DefaultValue(false)]
+        [DisplayName("Revert On Error")]
+        [Description("Set this to true if you want to revert the version change in case a build fails. Discouraged.")]
+        public bool RevertOnError { get; set; }
+
         private string _versionFilename = string.Empty;
         /// <summary>
         /// Gets or sets the version info filename.
@@ -227,6 +237,7 @@ namespace AutoVersion
                     _airDescriptorFilename = XmlUtils.GetAttributeValue(projectVersionDocument, "airDescriptorFile", string.Empty);
                     IncrementBeforeBuild = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "incrementBeforeBuild", "true"));
                     UseGlobalSettings = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "useGlobalSettings", (GlobalIncrementSettings.GetInstance().Apply == GlobalIncrementSettings.ApplyGlobalSettings.AsDefault).ToString()));
+                    RevertOnError = bool.Parse(XmlUtils.GetAttributeValue(projectVersionDocument, "revertOnError", "false"));
 
                     try
                     {
@@ -275,6 +286,7 @@ namespace AutoVersion
 
                 projectVersionDocument.WriteAttributeString("autoUpdateVersionData", AutoUpdateVersionData.ToString());
                 projectVersionDocument.WriteAttributeString("versioningStyle", VersioningStyle.ToGlobalVariable());
+                projectVersionDocument.WriteAttributeString("revertOnError", RevertOnError.ToString());
 
                 if (!string.IsNullOrEmpty(VersionFilename))
                     projectVersionDocument.WriteAttributeString("versionFilename", VersionFilename);

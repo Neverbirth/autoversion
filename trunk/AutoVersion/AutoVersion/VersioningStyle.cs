@@ -227,7 +227,7 @@ namespace AutoVersion
         /// <param name="projectStartDate">The project start date.</param>
         /// <returns>The incremented version.</returns>
         internal Version Increment(Version currentVersion, DateTime buildStartDate, DateTime projectStartDate,
-            string projectFilePath, BuildAction buildAction, BuildState buildState)
+            string projectFilePath, BuildAction buildAction, BuildState buildState, bool traceEnabled)
         {
 
             int major = currentVersion.Major;
@@ -252,22 +252,22 @@ namespace AutoVersion
             if (RevisionProcessor != null)
                 version = RevisionProcessor.ProcessVersionValue(version, VersionPart.Revision, buildStartDate,
                                                              projectStartDate, projectFilePath, buildAction,
-                                                             buildState);
+                                                             buildState, PluginCore.PluginBase.CurrentProject.TraceEnabled);
 
             if (BuildProcessor != null)
                 version = BuildProcessor.ProcessVersionValue(version, VersionPart.Build, buildStartDate,
                                                              projectStartDate, projectFilePath, buildAction,
-                                                             buildState);
+                                                             buildState, PluginCore.PluginBase.CurrentProject.TraceEnabled);
 
             if (MinorProcessor != null)
                 version = MinorProcessor.ProcessVersionValue(version, VersionPart.Minor, buildStartDate,
                                                              projectStartDate, projectFilePath, buildAction,
-                                                             buildState);
+                                                             buildState, PluginCore.PluginBase.CurrentProject.TraceEnabled);
 
             if (MajorProcessor != null)
                 version = MajorProcessor.ProcessVersionValue(version, VersionPart.Major, buildStartDate,
                                                              projectStartDate, projectFilePath, buildAction,
-                                                             buildState);
+                                                             buildState, PluginCore.PluginBase.CurrentProject.TraceEnabled);
 
             return version;
         }

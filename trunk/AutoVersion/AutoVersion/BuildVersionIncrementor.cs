@@ -34,6 +34,7 @@ namespace AutoVersion
         private BuildAction _currentBuildAction;
         private BuildState _currentBuildState;
         private ProjectItem _projectItem;
+        private Version _currentVersion;
         private DateTime _buildStartDate = DateTime.MinValue;
 
         private IncrementorCollection _incrementors = new IncrementorCollection();
@@ -57,6 +58,7 @@ namespace AutoVersion
         }
 
         private static BuildVersionIncrementor _instance;
+
         /// <summary>
         /// Gets the instance.
         /// </summary>
@@ -150,21 +152,22 @@ namespace AutoVersion
             ProjectItemIncrementSettings settings = _projectItem.IncrementSettings;
             if (_currentBuildAction.EqualsType(settings.BuildAction) && settings.ConfigurationType.IsEqualToTraceValue(PluginBase.CurrentProject.TraceEnabled))
             {
-                if (_projectItem.IncrementSettings.IncrementBeforeBuild == (_currentBuildState == BuildState.BuildInProgress))
+                if (settings.IncrementBeforeBuild == (_currentBuildState == BuildState.BuildInProgress))
                 {
 
-                    _projectItem.Version = _projectItem.IncrementSettings.VersioningStyle.Increment(
+                    _projectItem.Version = settings.VersioningStyle.Increment(
                         _projectItem.Version,
-                        _projectItem.IncrementSettings.IsUniversalTime
+                        settings.IsUniversalTime
                             ? _buildStartDate.ToUniversalTime()
                             : _buildStartDate,
-                        _projectItem.IncrementSettings.StartDate,
+                        settings.StartDate,
                         PluginBase.CurrentProject.ProjectPath,
-                        _currentBuildAction, _currentBuildState);
+                        _currentBuildAction, _currentBuildState,
+                        PluginBase.CurrentProject.TraceEnabled);
 
                     _projectItem.SaveVersion();
 
-                    if (_projectItem.IncrementSettings.UpdateAirVersion && _projectItem.IsAirProjector())
+                    if (settings.UpdateAirVersion && _projectItem.IsAirProjector())
                     {
                         _projectItem.UpdateAirVersion();
                     }
@@ -180,7 +183,17 @@ namespace AutoVersion
 
         public void OnBuildFailed()
         {
+            if (_projectItem.IncrementSettings.IncrementBeforeBuild)
+            {
+                _projectItem.Version = _currentVersion;
 
+                _projectItem.SaveVersion();
+
+                if (_projectItem.IncrementSettings.UpdateAirVersion && _projectItem.IsAirProjector())
+                {
+                    _projectItem.UpdateAirVersion();
+                }
+            }
         }
 
         public void OnBuilding(BuildAction action)
@@ -188,6 +201,7 @@ namespace AutoVersion
             _currentBuildAction = action;
             _currentBuildState = BuildState.BuildInProgress;
             _buildStartDate = DateTime.Now;
+            _currentVersion = _projectItem.Version;
 
             ExecuteIncrement();
         }
@@ -195,6 +209,7 @@ namespace AutoVersion
         public void OnProject()
         {
             _projectItem = null;
+            _currentVersion = null;
         }
 
         #region  IDisposable
