@@ -130,7 +130,7 @@ namespace AutoVersion
 
         private bool ShouldSerializeVersioningStyle()
         {
-            return _versioningStyle.ToGlobalVariable() != "None.None.None.None.None.None.None.None.None.None.None.None";
+            return _versioningStyle.ToGlobalVariable() != "None.None.None.None.Both.Both.Both.Both.None.None.None.None";
         }
 
         #endregion
