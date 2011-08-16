@@ -64,7 +64,9 @@ namespace AutoVersion.Incrementors.PostProcessors
         /// <param name="buildStart">The build start date/time.</param>
         /// <param name="projectStart">The project start date/time.</param>
         /// <returns>The incremented value.</returns>
-        public override Version ProcessVersionValue(Version value, VersionPart versionPart, DateTime buildStart, DateTime projectStart, string projectFilePath, BuildAction buildAction, BuildState buildState)
+        public override Version ProcessVersionValue(Version value, VersionPart versionPart, DateTime buildStart,
+            DateTime projectStart, string projectFilePath, BuildAction buildAction, BuildState buildState,
+            bool traceEnabled)
         {
             switch (PostProcessStyle)
             {
