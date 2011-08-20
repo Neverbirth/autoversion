@@ -98,7 +98,7 @@ namespace AutoVersion.Design
                 buildRow.HeaderCell.Value = "Build";
                 SetRowCells(buildRow);
                 DataGridViewRow releaseRow = new DataGridViewRow();
-                releaseRow.HeaderCell.Value = "Release";
+                releaseRow.HeaderCell.Value = "Revision";
                 SetRowCells(releaseRow);
 
                 grid.Rows.AddRange(new DataGridViewRow[] { majorRow, minorRow, buildRow, releaseRow });
