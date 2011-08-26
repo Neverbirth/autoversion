@@ -131,6 +131,7 @@ namespace AutoVersion
             try
             {
                 _projectItem = new ProjectItem();
+                _currentVersion = _projectItem.Version;
 
                 if (GlobalIncrementSettings.GetInstance().Apply == GlobalIncrementSettings.ApplyGlobalSettings.Always || _projectItem.IncrementSettings.UseGlobalSettings)
                     _projectItem.ApplyGlobalSettings();
@@ -183,7 +184,7 @@ namespace AutoVersion
 
         public void OnBuildFailed()
         {
-            if (_projectItem.IncrementSettings.IncrementBeforeBuild)
+            if (_projectItem.IncrementSettings.IncrementBeforeBuild && _projectItem.IncrementSettings.RevertOnError)
             {
                 _projectItem.Version = _currentVersion;
 
@@ -201,7 +202,6 @@ namespace AutoVersion
             _currentBuildAction = action;
             _currentBuildState = BuildState.BuildInProgress;
             _buildStartDate = DateTime.Now;
-            _currentVersion = _projectItem.Version;
 
             ExecuteIncrement();
         }
@@ -217,6 +217,7 @@ namespace AutoVersion
         public void Dispose()
         {
             _projectItem = null;
+            _currentVersion = null;
         }
 
         #endregion
